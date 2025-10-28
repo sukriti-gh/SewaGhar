@@ -1,0 +1,15 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+*.log
+staticfiles/
+media/
+.env
+
+# VS Code
+.vscode/
+
+# Python
+venv/
+*.egg-info/

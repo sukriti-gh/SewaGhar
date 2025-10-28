@@ -1,0 +1,9 @@
+from django.apps import AppConfig
+
+
+class AdminManageConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'admin_manage'
+
+    def ready(self):
+        import booking.signals  
