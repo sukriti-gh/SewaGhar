@@ -23,7 +23,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
-    'adminlteui',       # optional, if you still use it
+    'adminlte3',       
     'booking',         # your main app
     'admin_manage',     # admin dashboard app
     'django.contrib.admin',
