@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -116,7 +117,7 @@ SITE_NAME = "SewaGhar"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-KHALTI_PUBLIC_KEY = "a905ae15008043e4b19228727561a78c" 
+KHALTI_PUBLIC_KEY = config('KHALTI_PUBLIC_KET')
 
-KHALTI_SECRET_KEY = "b630fb676ae54da0b04c2fe9c0e1a3ea"
-KHALTI_VERIFICATION_URL = "https://dev.khalti.com/api/v2/payment/verify/"
+KHALTI_SECRET_KEY = CONFIG('KHALTI_SECRET_KEY')
+#KHALTI_VERIFICATION_URL = "https://dev.khalti.com/api/v2/payment/verify/"
