@@ -49,36 +49,21 @@ class Appointment(models.Model):
     khalti_transaction_id = models.CharField(max_length=50, blank=True, null=True)
     dispute_created = models.BooleanField(default=False)
     dispute_resolved = models.BooleanField(default=False)
-    tier = models.CharField(max_length=20, default="bronze")
+    tier = models.CharField(max_length=20, default="bronze") # TIER field kept as requested
 
-    def update_credit_points(self):
-
-        from django.apps import apps
-        UserProfile = apps.get_model('booking', 'UserProfile')  # safely load UserProfile model
-
-        try:
-            user_profile = UserProfile.objects.get(user=self.user)
-        except UserProfile.DoesNotExist:
-            return  # if profile doesn’t exist, silently skip
-
-        if self.isFinished == "Yes":
-            # Add 1 point; reset to 0 after reaching 10
-            user_profile.credit_points = (user_profile.credit_points + 1) % 11
-            user_profile.save()
+    # update_credit_points method REMOVED
 
     def __str__(self):
         return f"{self.user} - {self.service} ({self.day})"
 
 
-# Signal to automatically update credit points when an Appointment is saved
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-@receiver(post_save, sender=Appointment)
-def update_credit_points(sender, instance, **kwargs):
-    instance.update_credit_points()
+# Signal to automatically update credit points when an Appointment is saved REMOVED
+# @receiver(post_save, sender=Appointment)
+# def update_credit_points(sender, instance, **kwargs):
+#     instance.update_credit_points()
 
 
+# --- DELETEDAPPOINTMENT MODEL (Credit Points logic REMOVED) ---
 class DeletedAppointment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     service = models.CharField(max_length=50, choices=SERVICE_CHOICES, default="Electrician")
@@ -98,36 +83,25 @@ class DeletedAppointment(models.Model):
     rating = models.IntegerField(null=True, blank=True)
     rated = models.BooleanField(default=False)
 
-    def update_credit_points(self):
-       
-        from django.apps import apps
-        UserProfile = apps.get_model('booking', 'UserProfile')  # safely load dynamically
-
-        try:
-            user_profile = UserProfile.objects.get(user=self.user)
-        except UserProfile.DoesNotExist:
-            return  # if profile doesn’t exist, skip safely
-
-        # Decrease credit points but don’t allow negative values
-        if user_profile.credit_points > 0:
-            user_profile.credit_points -= 1
-            user_profile.save()
+    # update_credit_points method REMOVED
 
     def __str__(self):
         return f"{self.user.username} | {self.service} | {self.day}"
 
 
-@receiver(post_save, sender=DeletedAppointment)
-def update_credit_points_deleted_appointment(sender, instance, **kwargs):
-    instance.update_credit_points()
+# Signal to decrease credit points for deleted appointments REMOVED
+# @receiver(post_save, sender=DeletedAppointment)
+# def update_credit_points_deleted_appointment(sender, instance, **kwargs):
+#     instance.update_credit_points()
 
+
+# --- STAFF MODEL (No changes required for the request) ---
 class Staff(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=255, unique=True, verbose_name='email address', default="")
     contact_number = models.CharField(max_length=100)
     assigned_user = models.CharField(max_length=100, default="")
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False, blank=True)
-    tier = models.CharField(max_length=50, default="Not assigned")
     service = models.CharField(max_length=100)
     bio = models.TextField(default='')
     image = models.ImageField(upload_to='images', null=True, blank=True, default='/default_image.png')
@@ -157,6 +131,7 @@ class Staff(models.Model):
     def __str__(self):
         return f"{self.name} | {self.tier} | {self.contact_number}" 
 
+# --- FEEDBACK MODEL (No changes required for the request) ---
 class Feedback(models.Model):
     date = models.DateField(auto_now=True)
     by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
@@ -168,17 +143,19 @@ class Feedback(models.Model):
     ]
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='complaint')
 
+# --- USERPROFILE MODEL (credit_points field REMOVED) ---
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images', null=True, blank=True, default='images/default_image.png')
     contact_number = models.CharField(max_length=10, blank=True, null=True, default='')
-    credit_points = models.IntegerField(default=0)
+    # credit_points field REMOVED
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
+# --- DELETEDSTAFF MODEL (No changes required for the request) ---
 class DeletedStaff(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=255, unique=True, verbose_name='email address', default="")
