@@ -1,0 +1,209 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="author" content="Kodinger" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Login Page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+<script src="{% static 'js/preloader.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- bootstrap core css -->
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/bootstrap.css' %}"
+/>
+<!-- font awesome style -->
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/font-awesome.min.css' %}"
+/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+
+<link href="{% static 'css/style.css' %}" rel="stylesheet" />
+<!-- responsive style -->
+<link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+
+<link rel="stylesheet" href="{% static 'css/global.css' %}" />
+
+
+<link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+<script src="{% static 'js/preloader.js' %}"></script>
+  <link rel="stylesheet" type="text/css" href="{%static 'css/my-login.css'%}" />
+  <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+</head>
+<div class="hero_area" style="font-size: 16px;">
+  
+  <header class="header_section" style="font-family: 'Poppins;">
+        <div class="header_bottom">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg custom_nav-container">
+                <a class="navbar-brand" href="{% url 'home' %}">
+                    <span>SewaGhar</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class=""></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{% url 'home' %}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'about' %}">About Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'services' %}">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'faq' %}">FAQ</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+</div>
+<body class="my-login-page">
+
+        <div class="preloader">
+          <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+      </div>
+  <section class="h-100">
+    <div class="container h-100">
+      <div class="row justify-content-md-center h-100">
+        <div class="card-wrapper">
+          <div class="brand">
+            <img src="{% static 'images/login.png' %}" alt="logo" />
+          </div>
+          <div class="card fat">
+            <div class="card-body">
+              <h4 class="card-title">Login</h4>
+              {% comment %} Form for login{% endcomment %}
+              <form method="POST" class="my-login-validation" novalidate="">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input id="email" type="email" class="form-control" name="email" value="" required autofocus />
+                  <div class="invalid-feedback">Email is invalid
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input id="password" type="password" class="form-control" name="password" required data-eye />
+                  <br><a href="{% url 'forgot_password'%}" class="float-right">
+                    Forgot Password?
+                  </a>
+                  <div class="invalid-feedback">Password is required</div>
+                  <div id="passwordLengthError" class="text-danger" style="display: none;">Password should be at least 8
+                    characters long</div>
+                </div>
+                <br>
+         
+                <div class="form-group m-0">
+                  <button type="submit" class="btn btn-primary btn-block mb-3">
+                    Login
+                  </button>
+                </div>
+                <a href="{% url 'login-provider' %}"> Login as ServiceProvider</a>
+                <div class="mt-4 text-center">
+                  Don't have an account?
+                  <a href="{% url 'register'%}">Create One</a>
+                </div>
+                <script>
+                  function showErrorAlert(message) {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Oops...',
+                      text: message,
+                    });
+                  }
+
+                  function showSuccessAlertAndRedirect(message, redirectURL) {
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Success!',
+                      text: message,
+                      showConfirmButton: false,
+                      timer: 2000 // Display duration in milliseconds (2 seconds in this example)
+                    }).then(() => {
+                      window.location.href = redirectURL; // Redirect to the provided URL after the alert disappears
+                    });
+                  }
+
+                  // Check for error messages and display SweetAlert if present
+                  {% if messages %}
+                  {% for message in messages %}
+                  {% if message.tags == 'error' %}
+                  showErrorAlert('{{ message }}');
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+
+                  // Check for successful login message and redirect if present
+                  {% if messages %}
+                  {% for message in messages %}
+                  {% if message.tags == 'success' %}
+                  showSuccessAlertAndRedirect('{{ message }}', '/login'); // Replace '/dashboard' with your actual dashboard URL
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                </script>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+      <!-- Footer section -->
+  <footer class="footer">
+    <div class="column">
+      <h4>Get in Touch</h4>
+      <ul>
+        <li><strong>Phone:</strong> +977-9860000000</li>
+        <li><strong>Address:</strong> Kathmandu, Nepal</li>
+        <li><strong>Email:</strong> sewaghar93@gmail.com</li>
+      </ul>
+    </div>
+    <div class="column quick-links">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="{% url 'about' %}">About Us</a></li>
+        <li><a href="{% url 'services' %}">Services</a></li>
+        <li><a href="{% url 'faq' %}">FAQ</a></li>
+        <li><a href="{% url 'register' %}">Register / Login</a></li>
+        <li><a href="{% url 'contact' %}">Contact Us</a></li>
+      </ul>
+    </div>
+  </footer>
+
+   
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="{% static 'js/my-login.js'%}"></script>
+</body>
+
+</html>

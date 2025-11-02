@@ -1,0 +1,256 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+  <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+  <script src="{% static 'js/preloader.js' %}"></script>
+  <title>Services</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- slider stylesheet -->
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
+  <!-- font awesome style -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}" />
+
+<link rel="stylesheet" href="{% static 'css/global.css' %}" />
+<!-- Before style.css -->
+  <!-- Custom styles for this template -->
+  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+</head>
+<style>
+  .btn-primary {
+    background-color: #FF6347;
+    /*tomato color for button */
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #FF4500;
+  }
+
+  /* Footer Styles  */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 60px;
+  background-color: #1b2a4e;
+  color: white;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.footer .column {
+  flex: 1;
+  min-width: 250px;
+  margin-bottom: 20px;
+}
+
+.footer h4 {
+  margin-bottom: 12px;
+  font-size: 16px;
+  color: white;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer li {
+  margin-bottom: 8px;
+}
+
+.footer a {
+  color: white;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer .quick-links {
+  text-align: right;
+}
+
+</style>
+
+<body>
+      <!-- Preloader section -->
+      <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  <div class="hero_area">
+    <!-- header section strats -->
+    <header class="header_section" style="font-family: 'Poppins;">
+            <div class="header_bottom">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="">
+              <span>SewaGhar</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                  <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'about' %}">About Us</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'services' %}">Services</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'faq' %}">FAQ</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'register' %}">
+                    <button type="button" class="btn btn-primary rounded-pill py-2 px-4">Register / Login</button>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <!-- end header section -->
+  </div>
+
+<section class="service_section layout_padding mt-0">
+  <div class="container mt-0">
+    <div class="heading_container heading_center mt-0">
+      <h2>Our Services</h2>
+    </div>
+    <div class="row">
+      <!-- Electrical Service -->
+      <div class="col-sm-6 col-md-6 col-lg-3 mx-auto">
+        <div class="box">
+          <div class="img-box">
+            <img src="{% static 'images/s2.png' %}" alt="" />
+          </div>
+          <div class="detail-box" onclick="redirectToPage()">
+            <h5>Electrical</h5>
+            <p>Providing reliable electrical solutions to power your world,
+              we specialize in installations, maintenance, and safety checks, ensuring uninterrupted
+              energy flow for your peace of mind.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plumbing Service -->
+      <div class="col-sm-6 col-md-6 col-lg-3 mx-auto">
+        <div class="box">
+          <div class="img-box">
+            <img src="{% static 'images/s3.png' %}" alt="" />
+          </div>
+          <div class="detail-box" onclick="redirectToPage()">
+            <h5>Plumbing</h5>
+            <p>
+              Delivering expert plumbing solutions to keep your systems flowing
+              smoothly, from repairs and installations to maintenance, count on us for a
+              watertight service that keeps your home or business running seamlessly.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Painting Service -->
+      <div class="col-sm-6 col-md-6 col-lg-3 mx-auto">
+        <div class="box">
+          <div class="img-box">
+            <img src="{% static 'images/s5.png' %}" alt="" />
+          </div>
+          <div class="detail-box" onclick="redirectToPage()">
+            <h5>Painting</h5>
+            <p>
+              Transform your space with our professional painting services. From interior
+              to exterior, we deliver quality finishes that bring color and life to your
+              home or business with precision and care.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cleaning Service -->
+      <div class="col-sm-6 col-md-6 col-lg-3 mx-auto">
+        <div class="box">
+          <div class="img-box">
+            <img src="{% static 'images/s4.png' %}" alt="" />
+          </div>
+          <div class="detail-box" onclick="redirectToPage()">
+            <h5>Cleaning</h5>
+            <p>
+              Experience spotless spaces with our comprehensive cleaning services.
+              We ensure every corner shines, providing thorough and reliable cleaning
+              solutions tailored to your residential or commercial needs.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-box">
+      <a href="{% url 'login' %}"> Book Now! </a>
+    </div>
+  </div>
+</section>
+
+  <!-- end service section -->
+
+    <!-- Footer section -->
+  <footer class="footer">
+    <div class="column">
+      <h4>Get in Touch</h4>
+      <ul>
+        <li><strong>Phone:</strong> +977-9860000000</li>
+        <li><strong>Address:</strong> Kathmandu, Nepal</li>
+        <li><strong>Email:</strong> sewaghar93@gmail.com</li>
+      </ul>
+    </div>
+    <div class="column quick-links">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="{% url 'about' %}">About Us</a></li>
+        <li><a href="{% url 'services' %}">Services</a></li>
+        <li><a href="{% url 'faq' %}">FAQ</a></li>
+        <li><a href="{% url 'register' %}">Register / Login</a></li>
+        <li><a href="{% url 'contact' %}">Contact Us</a></li>
+      </ul>
+    </div>
+  </footer>
+
+
+
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+</body>
+
+</html>

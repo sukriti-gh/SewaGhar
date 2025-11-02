@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Appointment</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        h2 {
+            color: #0066cc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        .pending {
+            color: #ff6600;
+        }
+    </style>
+</head>
+<body>
+        <!-- Logo Section -->
+        <div style="text-align: center; padding: 20px; background-color: #ffffff;">
+          <a href="https://imgbb.com/">
+            <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+          </a>
+            </div>
+            <p style="text-align: left;"> <b>Invoice Number: {{ appointment.invoice_number }} </b> </p>
+
+    <h2>Hello {{ appointment.user.username }}</h2>
+    <p>Your booking request has been successfully created. </p>
+    <p>Details:</p>
+    <table>
+        <tr>
+            <td>Staff</td>
+            <td>{{ appointment.staff }}</td>
+        </tr>
+        <tr>
+            <td>Service</td>
+            <td>{{ appointment.service }}</td>
+        </tr>
+        <tr>
+            <td>Date</td>
+            <td>{{ appointment.day }} at {{appointment.time }}</td>
+        </tr>
+        <tr>
+            <td>Booking Status</td>
+            <td>{% if not appointment.accepted %}New{% else %}Accepted{% endif %} </td>
+        </tr>
+        <tr>
+            <td>Payment</td>
+            <td>{{ appointment.payment_status }}</td>
+        </tr>
+        <tr>
+            <td>Location</td>
+            <td><a href="https://www.openstreetmap.org/?mlat={{ appointment.latitude }}&mlon={{ appointment.longitude }}" target="_blank">View on Map</a></td>
+        </tr>
+    </table>
+    <p>You will be informed once Service Provider accepts your request. </p>
+</body>
+</html>

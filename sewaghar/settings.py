@@ -114,3 +114,9 @@ SITE_NAME = "SewaGhar"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+KHALTI_PUBLIC_KEY = "a905ae15008043e4b19228727561a78c" 
+
+KHALTI_SECRET_KEY = "b630fb676ae54da0b04c2fe9c0e1a3ea"
+KHALTI_VERIFICATION_URL = "https://dev.khalti.com/api/v2/payment/verify/"

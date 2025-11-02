@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Request Accepted</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        header img {
+            width: 300px;
+            height: 300px;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/R4HZmC8V/logo.jpg" alt="logo" border="0"></a>
+    </header>
+
+    <main>
+        <p>Dear {{ vendor_request.user }},</p>
+        <p>Congratulations! Your vendor request has been accepted. We look forward to working with you! You now have service provider access. Log in using your current credentials.</p>
+        <p>We appreciate your commitment to providing quality services. Your registration marks the beginning of a successful partnership with SewaGhar.</p>
+        <p>Thank you,</p>
+        <p>SewaGhar</p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Rejected</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #ff0000; /* Red color for emphasis */
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+            <!-- Logo Section -->
+            <div style="text-align: center; padding: 20px; background-color: #ffffff;">
+            <a href="https://imgbb.com/">
+            <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+            </a>
+                </div>
+                <p style="text-align: left;"> <b>Invoice Number: {{ appointment.invoice_number }} </b> </p>
+
+    <h2>Booking Rejected</h2>
+    <p>Dear {{ appointment.user.username }},</p>
+    <p>We regret to inform you that your booking request has been rejected by the Service Provider, due to some unforeseen circumstance. We apologize for any inconvenience this may have caused.</p>
+    <p>Details:</p>
+    <table>
+        <tr>
+            <th>staff </th>
+            <td>{{ appointment.staff }}</td>
+        </tr>
+        <tr>
+            <th>Service</th>
+            <td>{{ appointment.service }}</td>
+        </tr>
+        <tr>
+            <th>Day</th>
+            <td>{{ appointment.day }}</td>
+        </tr>
+    </table>
+    {% if appointment.payment_status == "Paid" %}
+    <p style="color: #ff0000; font-size: larger;">Please check Khalti for refund. You should have received full refund. </p>
+    {% endif %}
+    <p>We encourage you to initiate a new booking request. Our team is here to assist you, and we look forward to serving you in the future.</p>
+    <p>Thank you for choosing our platform.</p>
+    <p>Best regards,</p>
+    <p>SewaGhar Team</p>
+</body>
+</html>

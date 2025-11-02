@@ -1,0 +1,224 @@
+<title>Bookings and History</title>
+{% extends 'layout.html' %}
+{% load static %}
+
+<!-- Add this in the head of your HTML file -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha384-xp9OpFT5ZL7U6IHLX+3FFOEl5fWllUAdqA6bZLLIawAgVVST0JSd5+qz95DukDIK" crossorigin="anonymous">
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" integrity="...">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" defer></script>
+
+
+<!-- Include any other head elements you might have, such as stylesheets, scripts, etc. -->
+{% block body %}
+<link rel="stylesheet" href="{% static 'css/user_history.css' %}">
+<link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+<script src="{% static 'js/preloader.js' %}"></script>
+
+
+
+<div class="preloader">
+    <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+</div>
+
+
+<div class="user-panel-container">
+    {% if user.is_authenticated %}
+    <h2 class="mt-1 mb-4">Booking History</h2>
+      
+
+        <!-- Appointment Loop -->
+        {% if appointments.count > 0 %}
+            <div class="appointments-section">
+                {% for appointment in appointments %}
+                    {% if appointment.isFinished != "No" or appointment.dispute_resolved %} 
+                        <div class="card appointment-card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ appointment.service }}</h3>
+                                <p class="card-text">
+                                    <strong>Name:</strong> {{ appointment.staff }}<br>
+                                    <strong>Date:</strong> {{ appointment.time }}, {{ appointment.day }}<br>
+                                </p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <!-- Button to trigger the modal -->
+                                {% if not appointment.rated %}
+                                    <form method="post" action="{% url 'rate_staff' appointment.id %}" id="ratingForm_{{ appointment.id }}">
+                                        {% csrf_token %}
+                                        <label for="rating"><b>Rate Staff: </b></label>
+                                        <select name="rating" id="rating">
+                                            <option value="1">&#9733;</option>
+                                            <option value="2">&#9733;&#9733;</option>
+                                            <option value="3">&#9733;&#9733;&#9733;</option>
+                                            <option value="4">&#9733;&#9733;&#9733;&#9733;</option>
+                                            <option value="5">&#9733;&#9733;&#9733;&#9733;&#9733;</option>
+                                        </select>
+                                        <button type="button" class="btn btn-primary" onclick="showConfirmation({{ appointment.id }})">Submit Rating</button>
+                                    </form>
+                                {% else %}
+                                    <p>This appointment has already been rated.</p>
+                                {% endif %}
+                                <button type="button" class="btn btn-success" onclick="addBill({{ appointment.id }})">Bill</button>
+                                <div class="modal fade" id="appointmentDetailsModal{{ appointment.id }}" tabindex="-1" role="dialog" aria-labelledby="appointmentDetailsModalLabel{{ appointment.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="appointmentDetailsModalLabel{{ appointment.id }}">Invoince</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="text-center mb-4">
+                                                    <img src="https://i.ibb.co/M1THsV9/logo.png" alt="Service Ease Logo" style="width: 200px; height: 100px;">
+                                                    
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p><strong>Invoice Number:</strong> {{ appointment.invoice_number }}</p>
+                                                        <p><strong>Date:</strong> {{ appointment.day }}</p>
+                                                        <p><strong>Customer Name:</strong> {{ appointment.user }}</p>
+                                                        <!-- Add more customer information as needed -->
+                                                    </div>
+
+                                                </div>
+                                                <hr>
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Item</th>
+                                                            <th>Service Charge</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Example item -->
+                                                        <tr>
+                                                            <td>{{ appointment.service }}</td>
+                                                            <td>
+                                                                {% if appointment.tier == "bronze" %}
+                                                                    NPR 100
+                                                                {% elif appointment.tier == "silver" %}
+                                                                NPR 150
+                                                                {% elif appointment.tier == "gold" %}
+                                                                NPR 200
+                                                                {% endif %}
+                                                            </td>                                                        </tr>
+                                                        <!-- Add more items dynamically based on your data -->
+                                                    </tbody>
+                                                </table>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-md-6 offset-md-6">
+                                                        <p><strong>Amount:</strong>
+                                                            {% if appointment.payment_status == "Free" %}
+                                                                Free
+                                                            {% else %}
+                                                                {% if appointment.tier == "bronze" %}
+                                                                    NPR 100
+                                                                {% elif appointment.tier == "silver" %}
+                                                                    NPR 150
+                                                                {% elif appointment.tier == "gold" %}
+                                                                    NPR 200
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </p>
+                                                        <p><em>Please note that this amount represents the service charge only and additional fees may apply.</em></p>
+                                                        <!-- Add more billing information as needed -->
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            <div class="modal-footer" id="modalFooter{{ appointment.id }}">
+                                                <button type="button" class="btn btn-primary" onclick="printModal('appointmentDetailsModal{{ appointment.id }}')">Print</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    function addBill(appointmentId) {
+                                        // Implement functionality to add a bill for the appointment with ID appointmentId
+                                        // For now, you can just show the appointment details modal
+                                        viewAppointmentDetails(appointmentId);
+                                    }
+                                
+                                    function viewAppointmentDetails(appointmentId) {
+                                        // Show the modal with appointment details
+                                        $('#appointmentDetailsModal' + appointmentId).modal('show');
+                                
+                                        // Remove the close button from the modal header
+                                        $('#appointmentDetailsModal' + appointmentId).on('show.bs.modal', function () {
+                                            $(this).find('.modal-header button.close').remove();
+                                        });
+                                    }
+                                
+                                    function printModal(modalId) {
+                                        // Extract the appointment ID from modalId
+                                        var appointmentId = modalId.substring('appointmentDetailsModal'.length);
+                                
+                                        // Hide the footer buttons for printing
+                                        var modalFooter = document.getElementById('modalFooter' + appointmentId);
+                                        if (modalFooter) {
+                                            modalFooter.style.display = 'none';
+                                
+                                            // Get the HTML content of the modal
+                                            var modalContent = document.getElementById(modalId).innerHTML;
+                                
+                                            // Open a new window and set its content to the modal content
+                                            var printWindow = window.open('', '_blank');
+                                            printWindow.document.write('<html><head><title>Print Modal</title>');
+                                            printWindow.document.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">'); // Include Bootstrap CSS
+                                            printWindow.document.write('</head><body>');
+                                            printWindow.document.write(modalContent);
+                                            printWindow.document.write('</body></html>');
+                                
+                                            // Print the contents of the new window
+                                            printWindow.print();
+                                            printWindow.close();
+                                
+                                            // Show the footer buttons after printing
+                                            modalFooter.style.display = 'block';
+                                        } else {
+                                            console.error('Modal footer element not found');
+                                        }
+                                    }
+                                </script>
+                            </div>
+
+                        </div>
+
+                        <script>
+                            function showConfirmation(appointmentId) {
+                                // Using SweetAlert for confirmation
+                                Swal.fire({
+                                    title: 'Are you sure?',
+                                    text: 'Do you want to submit this rating?',
+                                    icon: 'question',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#3085d6',
+                                    cancelButtonColor: '#d33',
+                                    confirmButtonText: 'Yes, submit it!'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        // If confirmed, submit the form
+                                        document.getElementById('ratingForm_' + appointmentId).submit();
+                                    }
+                                });
+                            }
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have no completed bookings</p>
+        {% endif %}
+    {% else %}
+        <h1>Please Sign In</h1>
+        <a href="{% url 'login' %}" class="btn btn-primary mt-3">Sign in</a>
+    {% endif %}
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvC3l" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+{% endblock %}

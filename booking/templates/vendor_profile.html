@@ -1,0 +1,356 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/user_layout.css' %}">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="...">
+
+    <title>Profile</title>
+</head>
+<style>
+.profile-form {
+    max-width: 800px;
+    margin: auto;
+    height: auto !important;
+    padding: 50px !important;
+    border: none; /* Remove all borders */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    background-color: #fff; /* Add background color to maintain the gap */
+    top: 25px; /* Adjust this value to shift the form up */
+    bottom: 2px !important;
+}
+
+
+    .outer-ring {
+        width: 230px;
+        height: 230px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 10px solid rgb(199, 197, 197);
+        border-radius: 50%;
+    }
+
+    .outer-ring img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+    }
+
+    .profile-picture-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .btn:hover {
+        background: linear-gradient(to right, #2980b9, #3498db);
+        border-color: #fff;
+    }
+
+    .profile-picture {
+        object-fit: cover;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+    .no-image {
+        padding: 10px;
+        background-color: #eee;
+        border-radius: 50%;
+    }
+
+    #profileForm .profile-picture-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    #profileForm .profile-picture {
+        object-fit: cover;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+    #profileForm .no-image {
+        padding: 10px;
+        background-color: #eee;
+        border-radius: 50%;
+    }
+
+    #profileForm .change-picture-icon {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: #3498db;
+        color: #fff;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    #profileForm .change-picture-icon i {
+        margin-right: 5px;
+    }
+
+    /* Adjustments for small screens */
+    @media (max-width: 600px) {
+        .appointment-form {
+            max-width: 100%;
+        }
+    }
+</style>
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">SewaGhar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard-panel' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendor_req' %}">Requests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendor_appointments' %}">Appointments</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{user.username}}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'vendor_changepassword' staff.id %}">Change Password</a>
+                            <a class="dropdown-item" href="{% url 'vendor_profile' staff.id %}">View Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+</header>
+    <body>
+        <div class="preloader">
+            <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+        </div>
+      
+                <form method="post" action="{% url 'update_staff' staff.id %}" class="profile-form" id="profileForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group mt-2 text-center">
+                        <div class="outer-ring offset-md-4">
+                            {% if staff.image %}
+                                <div id="profilePictureContainer" style="position: relative;">
+                                    <img id="image" src="{{ staff.image.url }}" alt="{{ image }}" style="object-fit: cover; width: 200px; height: 200px; border-radius: 50%; cursor: pointer;" onclick="editProfilePicture()">
+                                    <span id="editIcon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; display: none;">
+                                        <i class="hidden bi-pencil-fill edit-icon" onclick="editProfilePicture()"></i>
+                                    </span>
+                                </div>
+                            {% else %}
+                                <div id="placeholder" style="width: 200x; height: 200px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <span style="color: #fff; font-size: 24px;">No image available</span>
+                                    <i class="bi bi-camera-fill camera-icon" onclick="editProfilePicture()"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="profile_picture" style="cursor: pointer; display: none;">
+                            Change Profile Picture
+                        </label>
+                        <input type="file" name="image" accept="image/*" id="profile_picture" style="display: none;" onchange="updateProfilePicture(this)">
+                    </div>
+                    
+                    <script>
+                        function editProfilePicture() {
+                            var editIcon = document.getElementById('editIcon');
+                            var profilePictureInput = document.getElementById('profile_picture');
+                
+                            // Hide the edit icon
+                            if (editIcon) {
+                                editIcon.style.display = 'none';
+                            }
+                
+                            // Trigger the file input click
+                            if (profilePictureInput) {
+                                profilePictureInput.click();
+                            }
+                        }
+                
+                        // Optionally, you can show the edit icon on hover
+                        document.getElementById('profilePictureContainer').addEventListener('mouseenter', function () {
+                            var editIcon = document.getElementById('editIcon');
+                            if (editIcon) {
+                                editIcon.style.display = 'none';
+                            }
+                        });
+                
+                        document.getElementById('profilePictureContainer').addEventListener('mouseleave', function () {
+                            var editIcon = document.getElementById('editIcon');
+                            if (editIcon) {
+                                editIcon.style.display = 'none';
+                            }
+                        });
+                
+                        // Function to handle the file input change
+                        function updateProfilePicture(input) {
+                            var image = document.getElementById('image');
+                            var placeholder = document.getElementById('placeholder');
+                
+                            if (input.files && input.files[0]) {
+                                var reader = new FileReader();
+                
+                                reader.onload = function (e) {
+                                    if (image) {
+                                        image.src = e.target.result;
+                                        if (placeholder) {
+                                            placeholder.style.display = 'none';
+                                        }
+                                    }
+                                };
+                
+                                var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+                                if (!allowedExtensions.exec(input.value)) {
+                                    // Display SweetAlert alert for invalid file type
+                                    Swal.fire({
+                                        title: 'Invalid File Type',
+                                        text: 'Please select a valid image file (JPG, JPEG, or PNG).',
+                                        icon: 'error',
+                                    });
+                
+                                    // Clear the input field to prevent submitting invalid file type
+                                    input.value = '';
+                                    return; // Stop the function execution
+                                }
+                
+                                reader.readAsDataURL(input.files[0]);
+                            } else {
+                                // Display SweetAlert alert when no file is selected
+                                Swal.fire({
+                                    title: 'No Image Selected',
+                                    text: 'Please select an image file.',
+                                    icon: 'error',
+                                });
+                
+                                // Clear the input field to prevent submitting without an image
+                                input.value = '';
+                            }
+                        }
+                    </script>
+                    
+                    
+                        <div class="form-group mt-3">
+                            <label for="Name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="Name" name="staff" value="{{ staff.name }}" readonly>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="Name" class="form-label">Email</label>
+                            <input type="text" class="form-control" id="Name" name="staff" value="{{ staff.email }}" readonly>
+                        </div>
+                        <label for="serviceSelect" class="form-label">Service:</label>
+                        <input type="text" class="form-control" id="serviceSelect" name="service" value="{{ staff.service }}" readonly>
+                    </div>
+        
+                    <div class="form-group mt-3">
+                        <label for="number" class="form-label">Contact Number</label>
+                        <input type="text" class="form-control" name ="number" value="{{ staff.contact_number }}" >
+                    </div>
+                    
+                    <div class="form-group mt-3">
+                        <label for="bioField" class="form-label">Bio</label>
+                        <input type="text" class="form-control" id="addressField" name="bio" value="{{ staff.bio }}" readonly>
+                    </div>
+        
+                    <div class="form-group mt-3">
+                        <label for="paymentStatusField" class="form-label">Tier</label>
+                        <input type="text" class="form-control" id="tierfield" name="payment_status" value="{{ staff.tier }}" readonly>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary" onclick="submitFormWithConfirmation()">Update</button>
+                    </div>
+                </form>
+        </div>
+
+
+        <script>
+            function confirmLogout() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will be logged out',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, logout'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{% url 'login' %}"; // Redirect to logout URL
+                    }
+                });
+            }
+        </script>
+<script>
+    function submitFormWithConfirmation() {
+        // Validate the contact number
+        var contactNumberInput = document.getElementsByName('number')[0];
+        var contactNumber = contactNumberInput.value.trim();
+
+        if (!/^\d{10}$/.test(contactNumber)) {
+            // Display an error message if the contact number is not 10 digits
+            Swal.fire({
+                title: 'Invalid Contact Number',
+                text: 'Please enter a 10-digit contact number.',
+                icon: 'error',
+            }).then(() => {
+                location.reload();
+            });
+            return; // Stop the form submission
+        }
+
+        // If contact number is valid, proceed with the confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to update your profile.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit the form
+                document.getElementById('profileForm').submit();
+            }
+        });
+    }
+</script>
+    </body>

@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <title>Admin Dashboard</title>
+
+    {% block head %} {% endblock %}
+
+    <style>
+        body {
+            padding-top: 0;
+            margin-top: 0;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+
+        header {
+            background-color: #1b2a4e;
+            color: white;
+            padding: 10px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 15px;
+        }
+
+        .navbar-nav .nav-link {
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #dfeeff;
+        }
+
+        .navbar-toggler-icon {
+            color: white;
+        }
+
+        .alert {
+            margin-top: 20px;
+        }
+
+        .list-group-item {
+            background-color: #e9ecef;
+        }
+
+        .card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            border-radius: 0;
+        }
+
+        .btn-primary:hover {
+            background-color: #003c80;
+            border-color: #003c80;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+
+        @media (max-width: 768px) {
+    .container {
+        max-width: 90%; /* Adjust the percentage as needed */
+    }
+
+}
+
+    </style>
+</head>
+
+
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'admin_default' %}">Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_default' %}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_users' %}">
+                            Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_serviceproviders' %}">
+                            Service Providers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_staffrequest' %}">
+                            Service Provider Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_feedback' %}">
+                            Feedback
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_disputes' %}">
+                            Disputes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="confirmLogout()">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<body>
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+<div class="col">
+    <div id="appointments-section" class="content-section">
+    <div class="shadow p-4 mb-5 bg-body bg-body rounded text-black  m-5 ">
+<h1 class="text-center mt-5 mb-5">User Lists</h1>
+<input class="form-control form-control-lg fs-3 border border-primary" id="myInput" type="text" placeholder="Search Users">
+<br>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover mx-auto">
+        <thead>
+            <tr>
+                <th class="text-center" scope="col">Name</th>
+                <th class="text-center" scope="col">Date Joined</th>
+            </tr>
+        </thead>
+        <tbody id="myTable">
+            {% for user in users %}
+            {% if user.username != 'admin' %}
+            <tr>
+                <td class="text-center">{{user.username}}</td>
+                <td class="text-center">{{user.date_joined}}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</div>
+</div>
+<script>
+    // Get all sidebar links
+const links = document.querySelectorAll(".nav-link[data-target]");
+const defaultSection = document.getElementById("default-section");
+const sections = document.querySelectorAll(".content-section");
+
+// Function to filter tables
+function filterTable(inputId, tableId) {
+  document.getElementById(inputId).addEventListener('keyup', function () {
+    let filter = this.value.toUpperCase();
+    let rows = document.querySelectorAll(`#${tableId} tr`);
+
+    rows.forEach(function (row) {
+      let td = row.getElementsByTagName('td')[0];
+      if (td) {
+        let txtValue = td.textContent || td.innerText;
+        row.style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+      }
+    });
+  });
+}
+
+// Filtering tables
+filterTable('myInput', 'myTable');
+filterTable('myInput2', 'myTable');
+
+// Event listener for each link
+links.forEach((link) => {
+  link.addEventListener("click", function (e) {
+    e.preventDefault();
+    sections.forEach((section) => { section.style.display = "none"; });
+    defaultSection.style.display = "none";
+
+    const target = link.getAttribute("data-target");
+    const targetSection = document.getElementById(target);
+    if (targetSection) { targetSection.style.display = "block"; }
+    else { defaultSection.style.display = "block"; }
+  });
+});
+
+</script>
+<script>
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'login-admin' %}"; // Redirect to logout URL
+            }
+        });
+    }
+</script>
+</body>
+</html> 

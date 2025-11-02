@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import logout
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.utils import timezone
@@ -18,24 +19,24 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib.auth import authenticate, login
-
+from django.views.decorators.csrf import csrf_exempt
+from .models import Appointment, Staff
 
 def logout_view(request):
     logout(request)
 
     return JsonResponse({'message': 'Logout successful'})
 
-
+SERVICE_LIST = ['Plumber', 'Electrician', 'Painter', 'Cleaner']
 
 def login_view(request):
     if request.method == 'GET':
-        return render(request, 'loginServiceProvider.html')
+        return render(request, 'login_provider.html')
     elif request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -160,13 +161,6 @@ def vendor_req(request):
         'staff_member': staff_member,
     }
     return render(request, 'vendor_request.html', context)
-
-
-def generate_invoice_number():
-    # Generate a random number
-    random_number = str(uuid.uuid4().fields[-1])[:6]  
-    return f'HB/{random_number}/SE/10'
-
 
 
 @login_required(login_url=reverse_lazy('login'))
@@ -365,12 +359,8 @@ def bookingSubmit(request):
     print(user)
     user_profile = user.profile if user.is_authenticated else None
     # Filter staff members based on the selected service
-    if service == 'Plumber':
-        staff_members = Staff.objects.filter(service='Plumber')
-    elif service == 'Electrician':
-        staff_members = Staff.objects.filter(service='Electrician')
-    else:
-        staff_members = Staff.objects.all()
+    if service in SERVICE_LIST:  # ✅ Correct - uses the variable
+        staff_members = Staff.objects.filter(service=service)
 
     # Exclude the current user's name from the list of staff members
     if user.is_authenticated:
@@ -432,10 +422,190 @@ def bookingSubmit(request):
             return redirect('userPanel')
 
     return render(request, 'bookingSubmit.html', {
-        'times': times, 'staff': staff_members,'user_profile': user_profile
+        'times': times, 
+        'staff': staff_members,
+        'user_profile': user_profile,
+        'khalti_public_key': settings.KHALTI_PUBLIC_KEY,
     })
 
+def generate_invoice_number():
+   return str(uuid.uuid4())[:8].upper()
 
+@csrf_exempt
+@login_required(login_url=reverse_lazy('login'))
+def payment(request):
+
+    if request.method == 'POST':
+        # Get data needed for Khalti initiation from the POST request
+        payment_amount = request.POST.get('payment_amount') # Amount in Paisa
+        staff_id = request.POST.get('staff_id')
+        
+        # Get booking details from session
+        day = request.session.get('day')
+        service = request.session.get('service')
+        time = request.session.get('time')
+        
+        if not all([payment_amount, staff_id, day, service, time]):
+            messages.error(request, "Missing booking or payment data. Please try again.")
+            return redirect('bookingSubmit') 
+
+        try:
+            # 1. Store temporary data in session needed for the callback
+            request.session['khalti_payment_amount'] = payment_amount
+            request.session['khalti_staff_id'] = staff_id
+            
+            # 2. Prepare Khalti Initiation Payload
+            staff_member = Staff.objects.get(id=staff_id)
+            invoice_number = generate_invoice_number() # Use a unique ID for Khalti reference
+            
+            # CRITICAL: Use a unique purchase_order_id. I'm using the invoice_number.
+            purchase_order_id = invoice_number 
+            
+            # CRITICAL: Define the callback URL where Khalti sends the user back.
+            callback_url = request.build_absolute_uri(reverse('khalti_callback'))
+
+            url = "https://a.khalti.com/api/v2/epayment/initiate/"
+            
+            payload = json.dumps({
+                "return_url": callback_url,
+                "website_url": request.build_absolute_uri('/'), # Your website's root URL
+                "amount": int(payment_amount), # Must be in Paisa
+                "purchase_order_id": purchase_order_id,
+                "purchase_order_name": f"Booking for {service} on {day} at {time}",
+                "customer_info": {
+                    "name": request.user.username,
+                    "email": request.user.email,
+                    "phone": request.session.get('number') or "9800000000", # Fallback
+                }
+            })
+
+            headers = {
+                'Authorization': f'key {settings.KHALTI_SECRET_KEY}', # Use key from settings
+                'Content-Type': 'application/json',
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            response_data = response.json()
+
+            if response.status_code == 200 and 'payment_url' in response_data:
+                # 3. Store the Khalti transaction details before redirect
+                request.session['khalti_purchase_order_id'] = purchase_order_id
+                
+                return redirect(response_data['payment_url'])
+            else:
+                print(f"Khalti Init Error: {response_data}")
+                messages.error(request, f"Could not initiate payment: {response_data.get('detail', 'Unknown error')}")
+                return redirect('bookingSubmit')
+
+        except Staff.DoesNotExist:
+            messages.error(request, "Selected staff member not found.")
+            return redirect('bookingSubmit')
+        except Exception as e:
+            print(f"Payment initiation error: {e}")
+            messages.error(request, "An unexpected error occurred during payment initiation.")
+            return redirect('bookingSubmit')
+
+    return redirect('bookingSubmit') # Should only be hit via POST from bookingSubmit
+
+
+@login_required(login_url=reverse_lazy('login'))
+def khalti_callback(request):
+   
+    if request.method == 'GET':
+        pidx = request.GET.get('pidx')
+        status = request.GET.get('status')
+        
+        # Check if the session data is available
+        khalti_purchase_order_id = request.session.get('khalti_purchase_order_id')
+        khalti_payment_amount = request.session.get('khalti_payment_amount') # Paisa
+        khalti_staff_id = request.session.get('khalti_staff_id')
+
+        # Clear session data immediately
+        request.session.pop('khalti_purchase_order_id', None)
+        request.session.pop('khalti_payment_amount', None)
+        request.session.pop('khalti_staff_id', None)
+        
+        if status == 'Completed' and pidx:
+            # 1. Verify Payment
+            url = "https://a.khalti.com/api/v2/epayment/lookup/"
+            headers = {
+                'Authorization': f'key {settings.KHALTI_SECRET_KEY}',
+                'Content-Type': 'application/json',
+            }
+            data = json.dumps({'pidx': pidx})
+            res = requests.request('POST', url, headers=headers, data=data)
+            new_res = res.json()
+            
+            if new_res.get('status') == 'Completed' and str(new_res.get('purchase_order_id')) == khalti_purchase_order_id:
+                # 2. Payment Verification SUCCESS & ID Match
+                
+                # Retrieve booking data from the session (original data from booking view)
+                day = request.session.get('day')
+                number = request.session.get('number')
+                service = request.session.get('service')
+                address = request.session.get('address')
+                time = request.session.get('time')
+                email = request.session.get('email')
+                latitude = request.session.get('latitude')
+                longitude = request.session.get('longitude')
+                description = request.session.get('description')
+                
+                try:
+                    staff_member = Staff.objects.get(id=khalti_staff_id)
+                    
+                    # 3. Create Appointment (using the original purchase_order_id as invoice_number)
+                    appointment = Appointment.objects.create(
+                        day=day,
+                        time=time,
+                        user=request.user,
+                        address=address,
+                        description=description,
+                        number=number,
+                        latitude=latitude,
+                        longitude=longitude,
+                        email=email,
+                        service=service,
+                        staff=staff_member.name,
+                        tier=staff_member.tier,
+                        payment_status='Paid via Khalti',
+                        invoice_number=khalti_purchase_order_id,
+                        khalti_transaction_id=pidx,
+                    )
+                    
+                    # 4. Email Sending Logic (keeping it brief)
+                    user_subject = 'Appointment Confirmation (Paid)'
+                    staff_subject = 'New Paid Appointment'
+                    user_message = render_to_string('user_appointment_created.html', {'appointment': appointment})
+                    staff_message = render_to_string('staff_appointment_created.html', {'appointment': appointment})
+
+                    send_mail(user_subject, strip_tags(user_message), 'your_email@example.com', [request.user.email], html_message=user_message)
+                    send_mail(staff_subject, strip_tags(staff_message), 'your_email@example.com', [staff_member.email], html_message=staff_message)
+
+                    messages.success(request, "Appointment booked and paid successfully via Khalti!")
+                    return redirect('userPanel')
+
+                except Staff.DoesNotExist:
+                    messages.error(request, "Booking failed: Staff member not found.")
+                    # A refund process should be initiated here if the payment was successful but booking failed.
+                    return redirect('bookingSubmit')
+                except Exception as e:
+                    print(f"Booking completion error: {e}")
+                    messages.error(request, "Payment successful, but booking failed. Contact support.")
+                    return redirect('userPanel') 
+            else:
+                # Verification failed (e.g., status not completed, or data mismatch)
+                messages.error(request, "Payment verification failed. Please try again.")
+                return redirect('bookingSubmit')
+
+        elif status == 'Pending':
+            messages.warning(request, "Payment is still pending. Please wait or contact support.")
+            return redirect('userPanel')
+            
+        else: # Failed or Canceled status from Khalti
+            messages.error(request, "Payment was canceled or failed. Please try again.")
+            return redirect('bookingSubmit')
+
+    return redirect('userPanel')
 
 @login_required(login_url=reverse_lazy('login'))
 def userPanel(request):
@@ -683,149 +853,6 @@ def edit_appointment(request, id):
 
 from datetime import datetime
 
-@login_required(login_url=reverse_lazy('login'))
-def payment(request):
-    user = request.user
-    email = request.POST.get('email')
-    today = datetime.now().date()
-    min_date = today.strftime('%Y-%m-%d')
-    delta_time = today + timedelta(days=21)
-    max_date = delta_time.strftime('%Y-%m-%d')
-    day = request.session.get('day')
-    number = request.session.get('number')
-    service = request.session.get('service')
-    address = request.session.get('address')
-    time = request.session.get('time')
-    email = request.session.get('email')
-    latitude = request.session.get('latitude')
-    longitude = request.session.get('longitude')
-    description = request.session.get('description')
-
-    if service == 'Plumber':
-        staff_members = Staff.objects.filter(service='Plumber')
-    elif service == 'Electrician':
-        staff_members = Staff.objects.filter(service='Electrician')
-    else:
-        staff_members = Staff.objects.all()
-
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        payment_token = data.get('payment_token')
-        payment_amount = data.get('payment_amount')
-        staff_id = data.get('staff_id')
-
-        khalti_secret_key = "test_secret_key_ce1adf77ac904ffbba3bc3687d287103"
-        verification_url = "https://khalti.com/api/v2/payment/verify/"
-
-        headers = {
-            'Authorization': f'key {khalti_secret_key}',
-        }
-        payload = {
-            'token': payment_token,
-            'amount': payment_amount,
-        }
-        response = requests.post(verification_url, headers=headers, json=payload)
-
-        if response.status_code == 200:
-            if service is not None and day <= max_date and day >= min_date:
-                try:
-                    staff_member = Staff.objects.get(id=staff_id)
-
-                    # Creating appointment for the selected staff member only
-                    appointment = Appointment.objects.create(
-                        day=day,
-                        time=time,
-                        user=user,
-                        address=address,
-                        description=description,
-                        number=number,
-                        latitude=latitude,
-                        longitude=longitude,
-                        email=email,
-                        service=service,
-                        staff=staff_member.name,
-                        tier=staff_member.tier,
-                        payment_status='Paid',
-                    )
-
-                    # Dynamic invoice number
-                    invoice_number = f"HB{datetime.now().strftime('%Y%m%d%H%M%S')}/SE/10"
-
-                    # Save the invoice number in the appointment
-                    appointment.invoice_number = invoice_number
-                    appointment.save()
-
-                    # CBMS API integration
-                    cbms_api_url = "https://cbapi.ird.gov.np/api/bill"
-                    cbms_headers = {'Content-Type': 'application/json'}
-
-                    cbms_data = {
-                        "username": "Test_CBMS",
-                        "password": "test@321",
-                        "seller_pan": "999999999",
-                        "buyer_pan": "HRIDAYA BHATTARAI 1",
-                        "buyer_name": "123456789",
-                        "fiscal_year": "2080.081",
-                        "invoice_number": invoice_number,
-                        "invoice_date": "2080.09.05",
-                        "total_sales": float(payment_amount),
-                        "taxable_sales_vat": float(payment_amount),
-                        "vat": 0,
-                        "excisable_amount": 0,
-                        "excise": 0,
-                        "taxable_sales_hst": 0,
-                        "hst": 0,
-                        "amount_for_esf": 0,
-                        "esf": 0,
-                        "export_sales": 0,
-                        "tax_exempted_sales": 0,
-                        "isrealtime": True,
-                        "datetimeclient": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-                    }
-                    print(cbms_data)
-                    try:
-                        cbms_response = requests.post(
-                            cbms_api_url, json=cbms_data, headers=cbms_headers)
-                        cbms_response.raise_for_status()
-
-                        cbms_response_data = cbms_response.json()
-                        if cbms_response_data:
-                            print(
-                                f"CBMS API: Bill posted successfully! Invoice Number: {invoice_number}")
-                            # Send invoice number to the user
-                            user_subject = 'New Appointment'
-                            user_message = render_to_string('user_appointment_created.html',
-                                                             {'appointment': appointment})
-                            user_email = request.user.email
-                            send_mail(user_subject, strip_tags(user_message), 'your_email@example.com',
-                                      [user_email], html_message=user_message)
-
-                            staff_subject = 'New Appointment'
-                            staff_message = render_to_string('staff_appointment_created.html',
-                                                              {'appointment': appointment})
-                            staff_email = staff_member.email
-                            send_mail(staff_subject, strip_tags(staff_message), 'your_email@example.com',
-                                      [staff_email], html_message=staff_message)
-
-                            messages.success(request, "Appointment created successfully!")
-                        else:
-                            print(f"CBMS API: Error code {cbms_response_data}")
-                            messages.error(request, "Error in CBMS API integration")
-
-                    except requests.exceptions.RequestException as e:
-                        print(f"CBMS API: Error posting bill - {e}")
-                        messages.error(request, "Error in CBMS API integration")
-
-                except Staff.DoesNotExist:
-                    messages.error(request, "Selected staff member does not exist")
-
-                return JsonResponse({'message': 'Appointment booked successfully'})
-            else:
-                messages.error(request, "The selected date isn't in the correct time period!")
-        else:
-            messages.error(request, "There was an error in payment verification")
-
-    return render(request, 'userPanel.html', {'times': times})
 
 
 @login_required(login_url=reverse_lazy('login'))
@@ -955,8 +982,9 @@ def refund_booking(request):
         payment_amount = data.get('payment_amount')
         appointment_id = data.get('appointment_id') 
 
-        khalti_secret_key = "test_secret_key_ce1adf77ac904ffbba3bc3687d287103"
-        verification_url = "https://khalti.com/api/v2/payment/verify/"
+        khalti_secret_key = settings.KHALTI_SECRET_KEY
+        verification_url = settings.KHALTI_VERIFICATION_URL
+
         headers = {
             'Authorization': f'key {khalti_secret_key}',
         }
@@ -1098,6 +1126,12 @@ def submit_invoice(request, id):
 @login_required(login_url=reverse_lazy('login'))
 def free_booking(request):
     user = request.user
+
+    times = [
+        "7 am", "8 am", "9 am", "10 am", "11 am", "12 pm",
+        "1 pm", "2 pm", "3 pm", "4 pm", "5 pm", "6 pm", "7 pm", "8 pm"
+    ]
+    
     staff_id = request.POST.get('staff_id')
     email = request.POST.get('email')
     today = datetime.now().date()
@@ -1114,10 +1148,8 @@ def free_booking(request):
     longitude = request.session.get('longitude')
     description = request.session.get('description')
 
-    if service == 'Plumber':
-        staff_members = Staff.objects.filter(service='Plumber')
-    elif service == 'Electrician':
-        staff_members = Staff.objects.filter(service='Electrician')
+    if service in SERVICE_LIST:
+        staff_members = Staff.objects.filter(service=service)
     else:
         staff_members = Staff.objects.all()
 

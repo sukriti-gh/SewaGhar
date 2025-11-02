@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Appointment</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        h2 {
+            color: #0066cc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+        <!-- Logo Section -->
+        <div style="text-align: center; padding: 20px; background-color: #f5f5f5;">
+          <a href="https://imgbb.com/">
+            <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+          </a>
+            </div>
+
+    <h2>Hello {{ appointment.staff }},</h2>
+    <p>A user deleted their existing booking.</p>
+    <p>Details:</p>
+    <table>
+        <tr>
+            <td>User</td>
+            <td>{{ appointment.user.username }}</td>
+        </tr>
+        <tr>
+            <td>User Contact</td>
+            <td>{{ appointment.number }}</td>
+        </tr>
+        <tr>
+            <td>Address</td>
+            <td>{{ appointment.address }}</td>
+        </tr>
+        <tr>
+            <td>Date</td>
+            <td>{{ appointment.day }}</td>
+        </tr>
+        <tr>
+            <td>Time</td>
+            <td>{{ appointment.time }}</td>
+        </tr>
+        <tr>
+            <td>Location</td>
+            <td><a href="https://www.openstreetmap.org/?mlat={{ appointment.latitude }}&mlon={{ appointment.longitude }}" target="_blank">View on Map</a></td>
+        </tr>
+    </table>
+    <p>This is just a notification. No action required</p>
+</body>
+</html>

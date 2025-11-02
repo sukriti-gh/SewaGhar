@@ -1,0 +1,281 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/user_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="...">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"
+    defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <style>
+        /* Custom styling for buttons */
+        .btn-custom {
+            display: inline-block;
+            width: 150px; /* Adjust the width as needed */
+            margin: 5px; /* Add margin for spacing */
+        }
+    
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            width: auto !important;
+        }
+    
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+    
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+    </style>
+    
+    
+    <title>Appointments</title>
+</head>
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">SewaGhar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard-panel' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendor_req' %}">Requests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vendor_appointments' %}">Appointments</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{user.username}}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'vendor_changepassword' staff_member.id %}">Change Password</a>
+                            <a class="dropdown-item" href="{% url 'vendor_profile' staff_member.id %}">View Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<body>
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+    <div id="tier-section" class="content-section">
+        <!-- ... Content specific to Vendors ... -->
+        <div class="shadow p-4 mb-5 bg-body bg-body rounded text-black  m-5 ">
+            <h1 class="text-center mt-3 mb-5">Pending Appointments</h1>
+            {% if appointments %}
+            
+            <div class="table-responsive">
+                <table class="table table-bordered  table-hover mx-auto">
+                    <thead>
+                        <tr>
+                            <th class="text-center" scope="col">Name</th>
+                            <th class="text-center" scope="col">Address</th>
+                            <th class="text-center" scope="col">Problem description</th>
+                            <th class="text-center" scope="col">Date</th>
+                            <th class="text-center" scope="col">Time</th>
+                            <th class="text-center" scope="col">Contact Number</th>
+                            <th class="text-center" scope="col">Action</th>
+                            <th class="text-center" scope="col">Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for appointment in appointments %}
+                        {% if appointment.accepted %} 
+                            {% if appointment.isFinished == 'No' %}
+                        <tr>
+                            <td class="text-center">{{appointment.user}}</td>
+                            <td class="text-center">{{ appointment.address|safe|linebreaksbr|truncatewords:4|slice:": -3" }}</td>
+                            <td class="text-center">{{appointment.description}}</td>
+                            <td class="text-center">{{appointment.day}}</td>
+                            <td class="text-center">{{appointment.time}}</td>
+                            <td class="text-center">{{appointment.number}}</td>
+                            <td class="text-center">
+
+                <button class="btn btn-secondary update-btn" onclick="confirmAppointment('{{ appointment.id }}')">Done</button>
+                </td>
+                <td class="text-center">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal-{{ appointment.id }}">
+                    View on Map
+                   </button>
+                </td>
+             <div class="modal" id="exampleModal-{{ appointment.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                 <div class="modal-dialog modal-xl" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="exampleModalLabel">Map</h5>
+<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+ <span aria-hidden="true">&times;</span>
+</button>
+</div>
+<div class="modal-body">
+<!-- Map container with fixed height -->
+<div id="map-{{ appointment.id }}" style="height: 500px;"></div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Custom script to initialize the map -->
+<script>
+$('#exampleModal-{{ appointment.id }}').on('shown.bs.modal', function () {
+var latitude = {{ appointment.latitude }};
+var longitude = {{ appointment.longitude }};
+var userName = "{{ appointment.user }}"; // Replace with the actual variable holding the user's name
+
+// Initialize the map
+var map = L.map('map-{{ appointment.id }}').setView([latitude, longitude], 20);
+
+// Add a tile layer (OpenStreetMap)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Add a marker
+var marker = L.marker([latitude, longitude]).addTo(map)
+.bindPopup('Location of '+userName).openPopup();
+
+// Print latitude and longitude to console
+console.log('Latitude:', latitude);
+console.log('Longitude:', longitude);
+});
+</script>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info">
+        No appointments available.
+
+    </div>
+    {% endif %}
+    
+        </div>
+    </div>
+    
+        
+</div>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                Swal.fire({
+                    title: 'Error',
+                    text: '{{ message|escapejs }}',
+                    icon: 'error',
+                    confirmButtonColor: '#007bff',
+                });
+            {% elif message.tags == 'success' %}
+                Swal.fire({
+                    title: 'Success',
+                    text: '{{ message|escapejs }}',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                });
+            {% endif %}
+        {% endfor %}
+
+        // Clear Django messages after displaying them
+        {% for message in messages %}
+            {# Iterate through the messages to clear them #}
+        {% endfor %}
+    {% endif %}
+</script>
+
+<script>
+    function confirmAppointment(appointmentId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This action will mark the appointment as finished.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, finish it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'appointmentFinished' id=0 %}".replace('0', appointmentId);
+            }
+        });
+    }
+    </script>
+    
+    <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You will be logged out',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, logout'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{% url 'login-provider' %}"; 
+                }
+            });
+        }
+    </script>
+
+
+</body>

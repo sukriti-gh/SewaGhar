@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Completed</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #00ff6a; /* Red color for emphasis */
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+            <!-- Logo Section -->
+            <div style="text-align: center; padding: 20px; background-color: #ffffff;">
+            <a href="https://imgbb.com/">
+            <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+            </a>
+                </div>
+                <p style="text-align: left;"> <b>Invoice Number: {{ appointment.invoice_number }} </b> </p>
+
+    <h2>Booking Completed</h2>
+    <p>Dear {{ appointment.user.username }},</p>
+    <p>Congratulations! Your booking has been successfully completed. We appreciate your trust in our services.</p>
+    <p>Booking Details:</p>
+    <table>
+        <tr>
+            <th>Staff </th>
+            <td>{{ appointment.staff }}</td>
+        </tr>
+        <tr>
+            <th>Service</th>
+            <td>{{ appointment.service }}</td>
+        </tr>
+        <tr>
+            <th>Day</th>
+            <td>{{ appointment.day }}</td>
+        </tr>
+    </table>
+    <p>We hope you had a great experience. If you have any feedback or questions, feel free to write to us. </p>
+    <p><b>Do not forget to rate our Service Providers. Your valuable rating matters to us!</b> </p>
+    <p>Thank you for choosing our platform. We look forward to serving you again!</p>
+    <p>Best regards,<br>SewaGhar Team</p>
+</body>
+</html>

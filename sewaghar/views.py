@@ -22,6 +22,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django.shortcuts import render
 
 
 def home(request):
@@ -39,6 +40,9 @@ def services_view(request):
 
 def contact_view(request):
     return render(request, 'contact.html')
+
+def custom_404_view(request, exception=None):
+    return render(request, 'custom_404.html', status=404)
 
 def register_view(request):
     if request.method == 'POST':
@@ -160,49 +164,6 @@ def login_view(request):
  
 
 
-# def forgot_password_view(request):
-#     if request.method == 'POST':
-#         email = request.POST.get('email')
-#         try:
-#             user = User.objects.get(email=email)
-#             request.session['reset_email'] = user.email  # Store the email in the session
-#             messages.success(request, "Please proceed to change your password.")
-#             return redirect('change_password')  # Redirect to the password change view
-#         except User.DoesNotExist:
-#             messages.error(request, "User with the provided email does not exist. Please try again.")
-#             return redirect('forgot_password')
-#     else:
-#         return render(request, 'forgot.html')
-
-
-# # Change Password View
-# def change_password(request):
-#     if request.method == 'POST':
-#         new_password = request.POST.get('new_password')
-#         confirm_password = request.POST.get('confirm_password')
-
-#         # Retrieve the email from the session
-#         reset_email = request.session.get('reset_email')
-#         if not reset_email:
-#             messages.error(request, "No password reset request found.")
-#             return redirect('forgot_password')
-
-#         if new_password != confirm_password:
-#             messages.error(request, 'The two password fields didn’t match.')
-#             return render(request, 'reset.html')
-#         try:
-#             user = User.objects.get(email=reset_email)
-#             user.set_password(new_password)
-#             user.save()
-#             update_session_auth_hash(request, user)  # Keep the user logged in after password change
-#             messages.success(request, 'Your password was successfully updated!')
-#             return redirect('login')  # Redirect to login page
-#         except User.DoesNotExist:
-#             messages.error(request, "User not found.")
-#             return redirect('forgot_password')
-#     else:
-#         return render(request, 'reset.html')
-#faq
 def faq_view(request):
     return render(request, 'faq.html')
     

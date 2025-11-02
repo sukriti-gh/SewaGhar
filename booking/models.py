@@ -3,8 +3,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 SERVICE_CHOICES = (
-    ("Electrician", "Electrician"),
-    ("Plumber", "Plumber"),
+    ('Electrician', 'Electrician'),
+    ('Plumber', 'Plumber'),
+    ('Painter', 'Painter'),     
+    ('Cleaner', 'Cleaner'),
 )
 
 class VendorRequest(models.Model):
@@ -23,6 +25,7 @@ class VendorRequest(models.Model):
 
     def __str__(self):
         return f"{self.user.username} | {self.business_name} | {self.business_category}"
+
 
 class Appointment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -43,18 +46,29 @@ class Appointment(models.Model):
     rating = models.IntegerField(null=True, blank=True)
     rated = models.BooleanField(default=False)
     invoice_number = models.CharField(max_length=50, blank=True, null=True)
+    khalti_transaction_id = models.CharField(max_length=50, blank=True, null=True)
     dispute_created = models.BooleanField(default=False)
     dispute_resolved = models.BooleanField(default=False)
     tier = models.CharField(max_length=20, default="bronze")
 
     def update_credit_points(self):
-        from sewaghar.booking.models import UserProfile  # path
-        user_profile = UserProfile.objects.get(user=self.user)
+
+        from django.apps import apps
+        UserProfile = apps.get_model('booking', 'UserProfile')  # safely load UserProfile model
+
+        try:
+            user_profile = UserProfile.objects.get(user=self.user)
+        except UserProfile.DoesNotExist:
+            return  # if profile doesn’t exist, silently skip
+
         if self.isFinished == "Yes":
-            user_profile.credit_points += 1
-            if user_profile.credit_points > 10:
-                user_profile.credit_points = 0
+            # Add 1 point; reset to 0 after reaching 10
+            user_profile.credit_points = (user_profile.credit_points + 1) % 11
             user_profile.save()
+
+    def __str__(self):
+        return f"{self.user} - {self.service} ({self.day})"
+
 
 # Signal to automatically update credit points when an Appointment is saved
 from django.db.models.signals import post_save
@@ -63,6 +77,7 @@ from django.dispatch import receiver
 @receiver(post_save, sender=Appointment)
 def update_credit_points(sender, instance, **kwargs):
     instance.update_credit_points()
+
 
 class DeletedAppointment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -84,13 +99,23 @@ class DeletedAppointment(models.Model):
     rated = models.BooleanField(default=False)
 
     def update_credit_points(self):
-        from sewaghar.booking.models import UserProfile  # updated path
-        user_profile = UserProfile.objects.get(user=self.user)
-        user_profile.credit_points -= 1
-        user_profile.save()
+       
+        from django.apps import apps
+        UserProfile = apps.get_model('booking', 'UserProfile')  # safely load dynamically
+
+        try:
+            user_profile = UserProfile.objects.get(user=self.user)
+        except UserProfile.DoesNotExist:
+            return  # if profile doesn’t exist, skip safely
+
+        # Decrease credit points but don’t allow negative values
+        if user_profile.credit_points > 0:
+            user_profile.credit_points -= 1
+            user_profile.save()
 
     def __str__(self):
         return f"{self.user.username} | {self.service} | {self.day}"
+
 
 @receiver(post_save, sender=DeletedAppointment)
 def update_credit_points_deleted_appointment(sender, instance, **kwargs):

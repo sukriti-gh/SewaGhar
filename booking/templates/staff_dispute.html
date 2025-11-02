@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Appointment</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        h2 {
+            color: #0066cc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+        .pending {
+            color: #ff6600;
+        }
+    </style>
+</head>
+<body>
+        <!-- Logo Section -->
+        <div style="text-align: center; padding: 20px; background-color: #ffffff;">
+          <a href="https://imgbb.com/">
+            <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+          </a>
+            </div>
+    <h2>Hello {{ appointment.staff }}</h2>
+    <p>We regret to inform you that a dispute has been raised regarding the appointment details mentioned above. To ensure transparency resolve this matter promptly, we kindly request your justification or any additional information related to this appointment.</p>
+    <p>Please provide your response at your earliest convenience. Your cooperation is crucial in maintaining the trust and satisfaction of our users.</p>
+    <table>
+        <tr>
+            <td>Staff</td>
+            <td>{{ appointment.user.username }}</td>
+        </tr>
+        <tr>
+            <td>Date</td>
+            <td>{{ appointment.day }} at {{appointment.time }}</td>
+        </tr>
+        <tr>
+            <td>Location</td>
+            <td><a href="https://www.openstreetmap.org/?mlat={{ appointment.latitude }}&mlon={{ appointment.longitude }}" target="_blank">View on Map</a></td>
+        </tr>
+    </table>
+    <p>If you have any questions or concerns, feel free to reach out to us. We appreciate your attention to this matter and thank you for your cooperation.</p>
+</body>
+</html>

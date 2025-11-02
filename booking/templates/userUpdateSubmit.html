@@ -1,0 +1,376 @@
+<title>Edit Appointment</title>
+{% extends 'layout.html' %}
+{% load static %}
+{% block body %}
+<link rel="stylesheet" href="{% static 'css/edit_panel.css' %}">
+<link rel="stylesheet" href="{% static 'css/user_booking.css' %}">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Add these links in the head section of your HTML -->
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="...">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+<!-- Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="..."></script>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="..."></script>
+<!-- Leaflet Control Geocoder -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<div class="container mt-5">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+
+
+    {% if user.is_authenticated %}
+        {% if True %}
+        
+        <div class="edit-appointment-card mx-auto" style="width: 600px;">
+            <h1 class="text-center">Edit Appointment</h1>
+                <div class="form-container"> 
+
+                    <form method="post" action="{% url 'userUpdateSubmit' id=appointment.id %}" class="appointment-form" id="updateForm" onsubmit="return validateForm()">        
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <div class="form-group mt-3">
+                            <label for="emailField" class="form-label">Service Provider</label>
+                            
+                            <input type="email" class="form-control" id="emailField" name="staff" value="{{ appointment.staff }}" readonly>
+                        </div>
+                        <label for="serviceSelect" class="form-label">Service:</label>
+                        <input type="email" class="form-control"  name="service" value="{{appointment.service}}" readonly>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="daySelect" class="form-label">Date:</label>
+                        <input type="date" class="form-select mb-3" name="day" id="dayPicker" value="{{ appointment.day }}">
+                    </div>
+                    <div>
+                        <label for="timeSelect" class="form-label">Time</label>
+                        <select class="form-select mt-3" name="time">
+                            {% for time in times %}
+                            <option value="{{ time }}">{{ time }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                </div>
+                <div class="form-group mt-3">
+                    <div class="form-label">Contact Number:</div>
+                    <input type="text" class="form-control" name="number" value="{{appointment.number}}" 
+                    placeholder="Enter your phone number" />
+                </div>
+                <div class="form-group">
+                    <label for="addressInput" class="form-label">
+                        Address 
+                        <span id="currentLocationText" style="display: none;"></span>
+                    </label>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" name="address" id="addressInput" value="{{appointment.address}}">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-secondary" onclick="getCurrentLocation()">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#mapModal">
+                                    <i class="fas fa-map"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>                            
+                
+                                      
+                    <!-- Map Modal -->
+                <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="mapModalLabel">Choose Location on Map</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                
+                                    <div id="map" style="height: 500px;"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <!-- Choose button to save latitude, longitude, and address -->
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveLocationBtn">Choose</button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Hidden Input for Coordinates -->
+                    <input type="hidden" name="latitude" id="latitudeInput" value="{{appointment.latitude}}">
+                    <input type="hidden" name="longitude" id="longitudeInput" value="{{appointment.longitude}}">
+                </div>
+                <script>
+                    function getCurrentLocation() {
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(
+                                function (position) {
+                                    // Get the latitude and longitude from the Geolocation API
+                                    const latitude = position.coords.latitude;
+                                    const longitude = position.coords.longitude;
+                
+                                    // Use a reverse geocoding API to get the address from the coordinates
+                                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const address = data.display_name;
+                                            updateCurrentLocationText(latitude, longitude, address);
+                                            
+                                            // Update the hidden inputs for latitude and longitude
+                                            document.getElementById('latitudeInput').value = latitude;
+                                            document.getElementById('longitudeInput').value = longitude;
+                                        })
+                                        .catch(error => {
+                                            console.error('Error getting address:', error);
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Oops...',
+                                                text: 'Failed to retrieve address from coordinates.'
+                                            });
+                                        });
+                                },
+                                function (error) {
+                                    console.error('Error getting current location:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: 'Failed to retrieve current location.'
+                                    });
+                                }
+                            );
+                        } else {
+                            console.error('Geolocation is not supported by this browser.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Geolocation is not supported by your browser.'
+                            });
+                        }
+                    }
+                
+                    function updateCurrentLocationText(latitude, longitude, address) {
+                        // Update the span inside the address input label with the obtained address
+                        document.getElementById('currentLocationText').innerText = 'Current Location: ' + address;
+                
+                        // Update the address input field with the obtained address
+                        document.getElementById('addressInput').value = address;
+                    }
+                </script>
+                
+                <script>
+                    var mapInitialized = false;
+                    var map, marker;
+                    
+                    $('#mapModal').on('shown.bs.modal', function () {
+                        // Check if the map is already initialized
+                        if (!mapInitialized) {
+                            // Initialize the map when the modal is shown
+                            // Set initial view to Kathmandu with zoom level 12
+                            map = L.map('map').setView([27.7172, 85.3240], 12);
+                    
+                            // Use OpenStreetMap tile layer
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
+                    
+                            // Set bounds for Kathmandu Valley
+                            var bounds = L.latLngBounds([27.5, 85.1], [27.8, 85.5]);
+                            map.setMaxBounds(bounds);
+                            map.on('drag', function () {
+                                map.panInsideBounds(bounds, { animate: false });
+                            });
+                    
+                            // Add a marker to the map (initially hidden)
+                            marker = L.marker([0, 0], { draggable: true, opacity: 0 }).addTo(map);
+                    
+                            // Handle manual selection on map
+                            map.on('click', function (e) {
+                                handleLocationSelection(e.latlng, '');
+                            });
+                    
+                            // Add search control to the map
+                            var searchControl = L.Control.geocoder({
+                                geocoder: L.Control.Geocoder.nominatim()
+                            }).addTo(map);
+                    
+                            // Listen for the 'markgeocode' event to update the marker position and address
+                            searchControl.on('markgeocode', function (event) {
+                                handleLocationSelection(event.geocode.center, event.geocode.name);
+                            });
+                    
+                            // Set the flag to true to indicate that the map is initialized
+                            mapInitialized = true;
+                        }
+                    });
+                    
+                    // Reset the map when the modal is closed
+                    $('#mapModal').on('hidden.bs.modal', function () {
+                        // Set the flag to false when the modal is closed, allowing the map to be initialized again
+                        mapInitialized = false;
+                    
+                        // Remove the marker from the map
+                        if (marker) {
+                            map.removeLayer(marker);
+                        }
+                    
+                        document.getElementById('map').innerHTML = ''; // Remove the map content
+                    });
+                    
+                    // Function to handle location selection (common for both manual and search selection)
+                    function handleLocationSelection(latlng, address) {
+                        // Check if the selected location is within the service range
+                        var bounds = L.latLngBounds([27.5, 85.1], [27.8, 85.5]);
+                        if (bounds.contains(latlng)) {
+                            // Update marker position
+                            marker.setLatLng(latlng);
+                            // Update input fields
+                            document.getElementById('latitudeInput').value = latlng.lat;
+                            document.getElementById('longitudeInput').value = latlng.lng;
+                            // Display the address in the input field
+                            document.getElementById('addressInput').value = address;
+                        } else {
+                            // Show SweetAlert error for out-of-service range
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Out of Service Range',
+                                text: 'Please select a location within Kathmandu Valley.',
+                            });
+                        }
+                    }
+                    </script>
+                    <div class="form-group mt-3">
+                        <label for="otherField" class="form-label">Payment Status</label>
+                        <input type="text" class="form-control" id="otherField" name="payment_status" value="{{appointment.payment_status}}" readonly>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Update Appointment</button>
+                    </div>
+                </form>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
+            <script>
+                function validateForm() {
+                    const dayValue = document.querySelector('input[name="day"]').value;
+                    const time = document.querySelector('select[name="time"]').value;
+                    const dateTimeValue = moment(`${dayValue} ${time}`, 'YYYY-MM-DD hh:mm a');
+                    const now = moment();
+            
+                    const address = document.querySelector('input[name="address"]').value;
+                    const number = document.querySelector('input[name="number"]').value;
+            
+                    // Additional fields for map or location options
+                    const latitude = document.querySelector('input[name="latitude"]').value;
+                    const longitude = document.querySelector('input[name="longitude"]').value;
+            
+                    if (!dayValue || !time || !number) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Please fill in all the values!'
+                        });
+                        return false;
+                    } else if (dateTimeValue.isBefore(now)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Date and time must not be in the past!'
+                        });
+                        return false;
+                    } else if (!(/^\d{10}$/.test(number))) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Contact number must be a 10-digit number!'
+                        });
+                        return false;
+                    }
+                    return true;
+                }
+            </script>
+
+<script>
+      const bookingURL = "{% url 'userPanel' %}";
+    document.getElementById('updateForm').addEventListener('submit', function (event) {
+        // Validate the form before submitting
+        if (!validateForm()) {
+            event.preventDefault(); // Prevent the form from submitting if validation fails
+            return;
+        }
+
+        event.preventDefault(); // Prevent the form from submitting directly
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to update this appointment?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If confirmed, manually submit the form
+                let form = document.getElementById('updateForm');
+                fetch(form.action, {
+                    method: form.method,
+                    body: new FormData(form)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success'
+                        }).then(() => {
+                            window.location.href = bookingURL; 
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message,
+                            icon: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                });
+            }
+        });
+    });
+</script>
+
+            
+            {% else %}
+            <div class="edit-appointment-card text-center">
+                <script>alert("Editing Appointments is only available 24hrs before the appointment!");</script>
+                <h1 class="mb-4">Appointment Editing Unavailable</h1>
+                <a href="{% url 'userPanel' %}" class="btn btn-primary">Return To User Panel</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="edit-appointment-card text-center">
+            <h1 class="mb-4">You Are Not Signed In!</h1>
+            <a href="{% url 'login' %}" class="btn btn-primary">Sign In</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Request Rejected</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        header img {
+            width: 300px;
+            height: 300px;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .rejected-message {
+            color: #ff0000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="https://imgbb.com/"><img src="https://i.ibb.co/R4HZmC8V/logo.jpg" alt="logo" border="0"></a>
+    </header>
+
+    <main>
+        <p>Dear {{ vendor_request.user }},</p>
+        <p class="rejected-message">We regret to inform you that your vendor request has been rejected. Unfortunately, we won't be able to proceed with your registration at this time.</p>
+        <p>If you have any questions or concerns, please feel free to contact us at <a href="mailto:sewaghar93@gmail.com">sewaghar93@gmail.com</a>.</p>
+        <p>Thank you for considering SewaGhar.</p>
+        <p>Best regards,<br>SewaGhar Team</p>
+    </main>
+</body>
+</html>

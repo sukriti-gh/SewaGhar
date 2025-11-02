@@ -1,0 +1,376 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <title>Admin Dashboard</title>
+
+
+    {% block head %} {% endblock %}
+
+    <style>
+        body {
+            padding-top: 0;
+            margin-top: 0;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+        .center-image {
+        text-align: center;
+    }
+
+        header {
+            background-color: #1b2a4e;
+            color: white;
+            padding: 10px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 15px;
+        }
+
+        .navbar-nav .nav-link {
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #dfeeff;
+        }
+
+        .navbar-toggler-icon {
+            color: white;
+        }
+
+        .alert {
+            margin-top: 20px;
+        }
+
+        .list-group-item {
+            background-color: #e9ecef;
+        }
+
+        .card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            border-radius: 0;
+        }
+
+        .btn-primary:hover {
+            background-color: #003c80;
+            border-color: #003c80;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+
+        @media (max-width: 768px) {
+    .container {
+        max-width: 90%; /* Adjust the percentage as needed */
+    }
+
+}
+
+    </style>
+</head>
+
+
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'admin_default' %}">Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_default' %}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_users' %}">
+                            Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_serviceproviders' %}">
+                            Service Providers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_staffrequest' %}">
+                            Service Provider Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_feedback' %}">
+                            Feedback
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_disputes' %}">
+                            Disputes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="confirmLogout()">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<body>
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+    <div id="delivered-section" class="content-section">
+<div class="container mt-5">
+<h1 class="mb-4">Service Provider Requests</h1>
+{% if vendor_requests %}
+<div class="container mt-5">
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for vendor_request in vendor_requests %}
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">{{ vendor_request.user.username }}</h5>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="#" class="btn btn-success" onclick="confirmAccept('{{ vendor_request.email }}')">Accept</a>
+                <a href="#" class="btn btn-danger" onclick="confirmReject('{{ vendor_request.email }}')">Reject</a>
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Viewmodal{{ vendor_request.id }}">View</button>
+            </div>
+          <div class="modal fade" id="Viewmodal{{ vendor_request.id }}" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">Vendor Details</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row"></th>
+                                    <td style="text-align: center;">
+                                        {% if vendor_request.image %}
+                                        <img id="image" src="{{ vendor_request.image.url }}" alt="{{ image}}" style=" object-fit: cover; width: 100%; height: 100%;">
+                                    {% else %}
+                                        No image available
+                                    {% endif %}
+                                    </td>
+                                </tr>                                
+                               <tr>
+                                    <th scope="row">Service Provider Name</th>
+                                    <td>{{ vendor_request.business_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Service Provider Address</th>
+                                    <td>{{ vendor_request.business_address }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Contact Number</th>
+                                    <td>{{ vendor_request.contact_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Business Description</th>
+                                    <td>{{ vendor_request.business_description }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Business Category</th>
+                                    <td>{{ vendor_request.business_category }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Citizenship Front</th>
+                                    <td> {% if vendor_request.image %}
+                                        <img id="image" src="{{ vendor_request.CA_image.url }}" alt="{{ image}}" style=" object-fit: cover; width: 100%; height: 100%;">
+                                    {% else %}
+                                        No image available
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <th scope="row">Citizenship Back</th>
+                                    <td> {% if vendor_request.image %}
+                                        <img id="image" src="{{ vendor_request.CB_image.url }}" alt="{{ image}}" style=" object-fit: cover; width: 100%; height: 100%;">
+                                    {% else %}
+                                        No image available
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <th scope="row">Document</th>
+                                    <td>
+                                        {% if vendor_request.docs %}
+                                            <a href="{{ vendor_request.docs.url }}" target="_blank">
+                                                View <i class="fas fa-eye" style="color: #312f2f;"></i>
+                                            </a>                                      
+                                            <!-- <a href="{{ vendor_request.docs.url }}" download="resume.pdf">
+                                                <i class="fas fa-download" style="color: #312f2f;"></i>
+                                            </a> -->
+                                        {% else %}
+                                            No document available
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                           
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                         
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</div>
+{% else %}
+<div class="container mt-5">
+<div class="alert alert-info text-center">
+    No service provider requests available.
+</div>
+</div>
+{% endif %}
+
+</div>
+</div>
+<script>
+    function confirmAccept(email) {
+        Swal.fire({
+            title: 'Accept Vendor Request',
+            text: 'Are you sure you want to accept this request?',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, accept it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'accept_vendor_request' 'dummy_email' %}".replace('dummy_email', email);
+            }
+        });
+    }
+
+    function confirmReject(email) {
+        Swal.fire({
+            title: 'Reject Vendor Request',
+            text: 'Are you sure you want to reject this request?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, reject it'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'reject_vendor_request' 'dummy_email' %}".replace('dummy_email', email);
+            }
+        });
+    }
+</script>
+
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                Swal.fire({
+                    title: 'Error',
+                    text: '{{ message|escapejs }}',
+                    icon: 'error',
+                    confirmButtonColor: '#007bff',
+                });
+            {% elif message.tags == 'success' %}
+                Swal.fire({
+                    title: 'Success',
+                    text: '{{ message|escapejs }}',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                });
+            {% endif %}
+        {% endfor %}
+
+        // Clear Django messages after displaying them
+        {% for message in messages %}
+            {# Iterate through the messages to clear them #}
+        {% endfor %}
+    {% endif %}
+</script>
+
+<script>
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{% url 'login-admin' %}"; // Redirect to logout URL
+            }
+        });
+    }
+
+    function showMessage(message) {
+        Swal.fire({
+            title: 'Success!',
+            text: message,
+            icon: 'success'
+        });
+    }
+</script>
+</body>
+</html>

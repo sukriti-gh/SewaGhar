@@ -1,0 +1,316 @@
+<title>Online Booking</title>
+{% comment %} {% extends 'layout.html' %} {% endcomment %}
+{% load static %}
+{% block body %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js'%}"></script>
+<script src="{% static 'js/popper.min.js'%}"></script>
+{# CRITICAL UPDATE: Using the official Khalti CDN for reliability #}
+<script src="https://khalti.s3.ap-south-1.amazonaws.com/KPG/dist/2020.12.17.0.0.0/khalti-checkout.iffe.js"></script>
+<link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+<script src="{% static 'js/preloader.js' %}"></script>
+<link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+
+
+<style>
+body {
+    background-color: #f4f6f9;
+}
+
+{% comment %} .custom-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+} {% endcomment %}
+
+.card-header {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.fas.fa-star {
+    font-size: 24px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004999;
+}
+</style>
+<body>
+{% if user.is_authenticated %}
+<div class="preloader">
+<img src="{% static 'images/search.gif' %}" alt="Preloader" />
+</div>
+<div class="shadow p-4 mb-5 bg-body rounded text-black m-5">
+<h1 class="text-center mb-4">Choose Your Provider</h1>
+
+<form method="post" action="{% url 'bookingSubmit' %}" class="me-2 ms-2" required>
+    <div id="user-credit-points" data-credit-points="{{ user_profile.credit_points }}"></div>
+    {% csrf_token %}
+    {% for staff_member in staff %}
+   <div class="d-flex justify-content-center mb-4">
+<div class="card border-primary custom-card shadow" style="width: 80%;">
+    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+        <h2 class="mb-0">{{ staff_member.name }}</h2>
+        {% if staff_member.tier == 'Gold' %}
+        <span class="badge bg-warning text-dark">Gold</span>
+        {% elif staff_member.tier == 'Silver' %}
+        <span class="badge bg-secondary">Silver</span>
+        {% endif %}
+    </div>
+    <div class="card-body" style="display: flex; justify-content: space-between; align-items: flex-start; text-align: left;">
+        <div style="flex: 1;">
+            <p><strong>Tier:</strong> {{ staff_member.tier }}</p>
+            <p><strong>Service:</strong> {{ staff_member.service }}</p>
+            <p><strong>Experience:</strong> {{ staff_member.experience }} years</p>
+            <p><strong>Rating:</strong> {{ staff_member.average_rating }}</p>
+            <p style="text-align: left;"><strong>Bio:</strong> {{ staff_member.bio | safe }}</p>
+        </div>
+        <div style="margin-top: -10px;margin-right: -5px; flex-shrink: 0;">
+            {% if staff_member.image %}
+                <img id="image" src="{{ staff_member.image.url }}" alt="{{ image }}" style="object-fit: cover; width: 300px; height: 250px;">
+            {% else %}
+                No image available
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div>
+            <span class="rate-tag  text-dark p-2 text-black">
+                Service Charge: 
+                {% if staff_member.tier == 'gold' %}
+                Rs  200
+                {% elif staff_member.tier == 'silver' %}
+                Rs 150
+                {% elif staff_member.tier == 'bronze' %}
+                Rs 100
+                {% else %}{
+                    Not assigned
+                }
+                {% endif %}
+            </span>
+        </div>
+<form method="POST" action="{% url 'submit_staff_data' %}" id="staffForm">
+{% csrf_token %}
+<input type="hidden" name="staff_name" value="{{ staff_member.name }}">
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmationModal{{ staff_member.id }}">
+    Choose
+</button>
+<div class="modal fade" id="confirmationModal{{ staff_member.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="booking-info">
+                    <h2>Do you want to book {{ staff_member.name }}?</h2>
+                    <ul>
+                      <li>Please review the description before proceeding.</li>
+                      <li>Choose your preferred payment option.</li>
+                      <li>Note: The charge mentioned is solely the service charge and does not encompass the entire cost.</li>
+                    </ul>
+                  </div>
+                
+                <div class="container mt-5">
+    <table class="table table-bordered border-primary">
+        <tbody>
+            <tr>
+                <th scope="row" class="table-primary">Provider Name</th>
+                <td>{{ staff_member.name }}</td>
+            </tr>
+            <tr>
+                <th scope="row" class="table-primary">Provider Tier</th>
+                <td>{{ staff_member.tier }}</td>
+            </tr>
+            <tr>
+                <th scope="row" class="table-primary">Service</th>
+                <td>{{ staff_member.service }}</td>
+            </tr>
+            <tr>
+                <th scope="row" class="table-primary" id="tierSelector">Service Charge</th>
+                <td> {% if staff_member.tier == 'gold' %}
+                    Rs  200
+                    {% elif staff_member.tier == 'silver' %}
+                    Rs 150
+                    {% elif staff_member.tier == 'bronze' %}
+                    Rs 100
+                    {% endif %}</td>
+            </tr>
+         
+        </tbody>
+    </table>
+
+</div>
+            </div>
+            <div class="modal-footer">
+                {% if user_profile.credit_points == 10 %}
+                <button type="button" class="btn btn-success" onclick="submitFreeBooking('{{ staff_member.id }}')">Free</button>
+            {% else %}
+                <button type="submit" class="btn btn-primary" onclick="submitForm(event, '{{ staff_member.id }}', 'cash')">Cash</button>
+                <button type="button" class="btn btn-info" onclick="Pay_Khalti('{{ staff_member.id }}','{{ staff_member.tier }}')">Pay with Khalti</button>
+            {% endif %}
+        </div>
+                       
+        </div>
+    </div>
+</div>
+</form> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script>
+function submitForm(event, staffId) {
+event.preventDefault();
+var form = event.target.closest('form');
+
+if (!form) {
+    console.error("Form not found");
+    return;
+}
+
+var creditPoints = parseFloat(document.getElementById('user-credit-points').getAttribute('data-credit-points'));
+
+if (creditPoints <= 0) {
+    // Display SweetAlert error message
+    Swal.fire({
+        icon: 'error',
+        title: 'Insufficient Credit Points',
+        text: 'You do not have enough credit points to make this booking. Please choose another payment option.'
+    });
+} else {
+    // Submit the form
+    form.submit();
+}
+}
+</script>
+
+<script>
+    const bookingURL = "{% url 'userPanel' %}";
+    function submitFreeBooking(staffId) {
+        // Make an AJAX request to the free_booking endpoint
+        $.ajax({
+            type: 'POST',
+            url: '{% url "free_booking" %}',
+            data: {
+                staff_id: staffId,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function (data) {
+            
+                console.log('Free booking success:', data.message);
+                window.location.href = bookingURL; 
+            },
+            error: function (error) {
+                // Handle the error response, e.g., show an error message
+                console.error('Free booking error:', error);
+            }
+        });
+    }
+</script>
+
+<script> 
+    // 🔑 CRITICAL FIX: Define URLs as constants at the top-level
+    const csrf_token = "{{ csrf_token }}";
+    const KHALTI_PAYMENT_URL = "{% url 'khalti-payment' %}";
+    const USER_PANEL_URL = "{% url 'userPanel' %}";
+    
+    async function Pay_Khalti(staffId, tier) {
+        console.log("Staff ID:", staffId);
+        console.log("Staff Tier:", tier);
+        let amount;
+
+        // --- CRITICAL UPDATE: Implement correct tiered pricing in PAISA (Rs * 100) ---
+        const lowerTier = tier.toLowerCase();
+        
+        if (lowerTier === "gold") {
+            amount = 20000; // Rs 200 * 100 paisa
+        } else if (lowerTier === "silver") {
+            amount = 15000; // Rs 150 * 100 paisa
+        } else if (lowerTier === "bronze") {
+            amount = 10000; // Rs 100 * 100 paisa
+        } else {
+            // Fallback for an unassigned tier (use a default or throw error)
+            console.error("Unknown staff tier. Using default test amount.");
+            amount = 1000; // For testing purposes (Rs 10)
+        }
+    
+        
+        const config = {
+            publicKey: "{{ khalti_public_key }}",
+            productIdentity: staffId,
+            productName: "Service Provider",
+            productUrl: "http://127.0.0.1:8000/",
+            eventHandler: {
+                onSuccess: async (payload) => {
+                    // payload.amount is the amount collected by Khalti in PAISA
+                    await pays(payload.token, payload.amount, staffId);
+                    
+                    // Hide modal and redirect only after successful backend processing
+                    $(`#confirmationModal${staffId}`).modal('hide');
+                    window.location.href = USER_PANEL_URL; 
+                },
+                onError: (error) => {
+                    console.log(error);
+                },
+                onClose: () => {
+                    // Handle modal close
+                },
+            },
+            paymentPreference: [
+                "KHALTI",
+            ],
+        };
+        try {
+            const checkout = new KhaltiCheckout(config);
+            checkout.show({ amount });
+            console.log("Khalti Checkout show() called.");
+        } catch (error) {
+            console.error("Khalti Checkout Failed to Open. Error Details:", error);
+        }
+    }
+
+    async function pays(paymentToken, amount, staffId) {
+        // This function sends the payment details to your Django backend (views.py: payment)
+        const response = await fetch(KHALTI_PAYMENT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token,
+            },
+            body: JSON.stringify({
+                payment_token: paymentToken,
+                payment_amount: amount,
+                staff_id: staffId,
+            }),
+        });
+
+        console.log("Backend payment status:", response.status);
+    };
+</script>
+
+    </div>
+</div>
+</div>
+
+    {% endfor %}
+</form>
+</div>
+{% else %}
+<div class="shadow p-4 mb-5 bg-body rounded text-black m-5">
+<h1 class="p-2 me-3">First Sign in!</h1>
+<a href="{% url 'login' %}" class="btn btn-primary text-white">Sign in</a>
+</div>
+{% endif %}
+{% endblock %}
+
+</body>

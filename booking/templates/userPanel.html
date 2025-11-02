@@ -1,0 +1,231 @@
+<title>User Appointments</title>
+
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block body %}
+
+    
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" integrity="...">
+    <link rel="stylesheet" href="{% static 'css/user_panel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" defer></script>
+
+
+
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+    <div class="user-panel-container">
+        {% if user.is_authenticated %}
+        <h2 class="mt-1 mb-4">Appointments</h2>
+        {% if appointments.count > 0 %}
+                <div class="appointments-section">
+                    {% for appointment in appointments %}
+                        {% if appointment.staff != "Not assigned" %}
+                            {% if appointment.isFinished == "No"%}
+                                <div class="card appointment-card">
+                                    <div class="card-body">
+                                        <h3 class="card-title">{{ appointment.service }}</h3>
+                                        <p class="card-text">
+                                            <strong>Invoice Number:</strong> {{ appointment.invoice_number }}</p>
+                                            <strong>Service Provider: </strong> {{ appointment.staff }} <br>
+                                            <strong>Date:</strong> {{appointment.time}} on {{ appointment.day }}<br>
+                                            <!-- <strong>Contact Number:</strong> {{ appointment.staff_number }} -->
+                                        </p>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <!-- Status badge on the left -->
+                                        <span class="badge {% if not appointment.isFinished %}{% else %}{% endif %} mr-2" style="font-size: 1.2rem;">
+                                            {% if appointment.isFinished != "No" %}
+                                                <span>Completed</span>
+                                            {% else %}
+                                                <span style="color: red;">Booked</span>
+                                                <span style="color: black; margin-left: 5px;">{{ appointment.payment_status }}</span>
+                                            {% endif %}
+                                        </span> 
+                                        <!-- Add this button in the card footer -->
+                                        <!-- Add this inside your appointment details section -->
+                                        <!-- Inside your appointment details section -->
+
+                                        {% if not appointment.dispute_created %}
+                                    <div>
+                                        {% if appointment.appointment_time_passed %}
+                                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#invoiceModal{{ appointment.id }}">Raise Concern</button>
+                                    {% endif %}
+                                    
+                                    <!-- Bootstrap Modal -->
+                                    <div class="modal fade" id="invoiceModal{{ appointment.id }}" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel{{ appointment.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="invoiceModalLabel{{ appointment.id }}">Enter Invoice Number</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Add a form to enter the invoice number -->
+                                                    <form id="invoiceForm{{ appointment.id }}" action="{% url 'submit_invoice' id=appointment.id %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="appointment_id" value="{{ appointment.id }}">
+                                                        <input type="hidden" name="staff_name" value="{{ appointment.staff }}">
+                                                        <label for="invoiceNumber">Invoice Number:</label>
+                                                        <input type="text" id="invoiceNumber{{ appointment.id }}" name="invoiceNumber" required>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary" onclick="submitInvoice('{{ appointment.id }}')">Submit</button>
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- JavaScript code -->
+                                    <script>
+                                        function submitInvoice(appointmentId) {
+                                            // Add JavaScript logic to handle the submitted invoice number
+                                            var invoiceNumberElement = document.getElementById('invoiceNumber' + appointmentId);
+                                            console.log('Invoice Number Element:', invoiceNumberElement);
+                                    
+                                            // Check if the element is found
+                                            if (invoiceNumberElement) {
+                                                var invoiceNumber = invoiceNumberElement.value;
+                                                console.log('Invoice Number Submitted:', invoiceNumber);
+                                    
+                                                // Submit the form
+                                                document.getElementById('invoiceForm' + appointmentId).submit();
+                                    
+                                                // Close the modal after handling the submission
+                                                $('#invoiceModal' + appointmentId).modal('hide');
+                                            } else {
+                                                console.error('Element not found');
+                                            }
+                                        }
+                                    </script>
+                                    
+                                        
+
+                                        
+                                            <form action="{% url 'edit_appointment' appointment.id %}" method="get" style="display: inline-block;">
+                                                <button type="submit" class="btn btn-primary" id="edit_ap">
+                                                    Edit
+                                                </button>
+                                            </form>
+
+                                            <form class="deleteForm" action="{% url 'appointmentDeleteBooking' appointment.id %}" method="post" style="display: inline-block;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="staff_name" value="{{ appointment.staff }}">
+                                                <button type="submit" class="btn btn-danger" id="del_ap">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                        {% else %}
+                                        <P> Dispute Created</P>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <script>
+                                    document.querySelectorAll('.deleteForm').forEach(form => {
+                                        form.addEventListener('submit', function(event) {
+                                            event.preventDefault(); // Prevent the form from submitting directly
+                                
+                                            Swal.fire({
+                                                title: 'Are you sure?',
+                                                text: "You won't be able to revert this!",
+                                                icon: 'warning',
+                                                showCancelButton: true,
+                                                confirmButtonColor: '#d33',
+                                                cancelButtonColor: '#3085d6',
+                                                confirmButtonText: 'Yes, delete it!'
+                                            }).then((result) => {
+                                                if (result.isConfirmed) {
+                                                    // If confirmed, submit the form via AJAX
+                                                    let currentForm = this;
+                                                    fetch(currentForm.action, {
+                                                        method: currentForm.method,
+                                                        body: new FormData(currentForm)
+                                                    })
+                                                    .then(response => {
+                                                        if (response.ok) {
+                                                            // If deletion successful, show success message
+                                                            Swal.fire(
+                                                                'Deleted!',
+                                                                'The appointment has been deleted.',
+                                                                'success'
+                                                            ).then(() => {
+                                // Reload the current page
+                                location.reload();
+                            });
+                                                            // You can redirect or perform additional actions here if needed
+                                                        } else {
+                                                            // If deletion failed, show an error message
+                                                            Swal.fire(
+                                                                'Error!',
+                                                                'An error occurred while deleting the appointment.',
+                                                                'error'
+                                                            );
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error:', error);
+                                                        // Show an error message if there's a network issue or other problem
+                                                        Swal.fire(
+                                                            'Error!',
+                                                            'An unexpected error occurred.',
+                                                            'error'
+                                                        );
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    });
+                                </script>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>You have no pending bookings</p>
+            {% endif %}
+        {% else %}
+        <script>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        Swal.fire({
+                            title: 'Error',
+                            text: '{{ message|escapejs }}',
+                            icon: 'error',
+                            confirmButtonColor: '#007bff',
+                        });
+                    {% elif message.tags == 'success' %}
+                        Swal.fire({
+                            title: 'Success',
+                            text: '{{ message|escapejs }}',
+                            icon: 'success',
+                            confirmButtonColor: '#007bff',
+                        });
+                    {% endif %}
+                {% endfor %}
+        
+                // Clear Django messages after displaying them
+                {% for message in messages %}
+                    {# Iterate through the messages to clear them #}
+                {% endfor %}
+            {% endif %}
+        </script>
+            <h1>Please Sign In</h1>
+            <a href="{% url 'login' %}" class="btn btn-primary mt-3">Sign in</a>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvC3l" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+{% endblock %}

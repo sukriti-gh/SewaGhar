@@ -22,34 +22,30 @@ from booking.models import Feedback
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-
-
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     return render(request, 'admin_manage/index.html')
 
 
 def admin_login(request):
-    
     if request.method == 'POST':
         email = request.POST.get('username')
         password = request.POST.get('password')
-        remember = request.POST.get('remember')
-        
-        # Use Django's built-in authentication.
+
         user = authenticate(username=email, password=password)
         if user is not None:
             if user.is_active and (user.is_staff or user.is_superuser):
                 login(request, user)
-
-                # Redirect to a dashboard or another page
-                return redirect('admin_default')
+                return redirect('index')  # ✅ direct path, no name lookup
             else:
                 messages.error(request, 'This account is not an admin.')
         else:
             messages.error(request, 'Invalid login credentials.')
 
     return render(request, 'admin_manage/login_adm.html')
+
 
 def dashboard_view(request):
     total_users = User.objects.exclude(username='admin').count()
@@ -143,6 +139,36 @@ def admin_feedback(request):
     }
     return render(request, 'admin_manage/admin_feedback.html', context)
 
+# Lists all disputes
+def admin_disputes(request):
+    disputed_appointments = Appointment.objects.filter(dispute_created=True)
+    return render(request, 'admin_manage/admin_disputes.html', {
+        'disputed_appointments': disputed_appointments
+    })
+
+# Resolves a specific dispute
+def resolve_dispute(request, appointment_id):
+    appointment = get_object_or_404(Appointment, pk=appointment_id)
+    if not appointment.dispute_resolved:
+        appointment.isFinished = "Yes"
+        appointment.dispute_resolved = True
+        appointment.save()
+        html_message = render_to_string('admin_manage/dispute_email.html', {'appointment': appointment})
+        plain_text_message = strip_tags(html_message)
+
+        send_mail(
+            'Dispute Resolved',
+            plain_text_message,
+            'sewaghar93@gmail.com',
+            [appointment.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return redirect(reverse('admin_disputes') + f'?success_message=Dispute resolved')
+    else:
+        messages.warning(request, 'Error')
+        return redirect(reverse('admin_disputes') + f'?warning_message=error ')
+
 
 def handle_feedback_action(request, feedback_id):
     # Retrieve the feedback object based on the feedback_id
@@ -159,7 +185,7 @@ def handle_feedback_action(request, feedback_id):
             send_mail(
                 'Your feedback has been read',
                 plain_text_message,
-                'serviceease6@gmail.com',  
+                'sewaghar93@gmail.com',  
                 [feedback.by.email], 
                 html_message=html_message,
                 fail_silently=False,
@@ -206,59 +232,34 @@ def admin_serviceproviders(request):
     return render(request, 'admin_manage/admin_serviceproviders.html',context)
 
 
+# Admin staff request page
 def admin_staffrequest(request):
-    total_service_providers = Staff.objects.count()  
-    pending_requests = VendorRequest.objects.count() 
-    vendor_requests = VendorRequest.objects.all()
+    total_service_providers = Staff.objects.count()
+    pending_requests = VendorRequest.objects.count()
+    vendor_requests_list = VendorRequest.objects.all()
     all_users = User.objects.all()
+
     try:
-        vendor_data=Staff.objects.all()
+        vendor_data = Staff.objects.all()
     except Exception as e:
-        print("Error",e)
+        print("Error", e)
+        vendor_data = []
 
     context = {
         'pending_requests': pending_requests,
         'total_service_providers': total_service_providers,
-        'vendor_requests':vendor_requests,
-        'items':vendor_data,
-        'users':all_users,
+        'vendor_requests': vendor_requests_list,
+        'items': vendor_data,
+        'users': all_users,
     }
-    return render(request, 'admin_manage/admin_staffrequest.html',context)
+    return render(request, 'admin_manage/admin_staffrequest.html', context)
 
 
-def reject_vendor_request(request, vendor_email):
-    # Retrieve all vendor requests with the given email
-    vendor_requests = VendorRequest.objects.filter(email=vendor_email)
+# Accept vendor request
+def accept_vendor_request(request, vendor_email):
+    vendor_request = get_object_or_404(VendorRequest, email=vendor_email)
 
-    # If there are any matches, delete the first one and send rejection email
-    if vendor_requests.exists():
-        vendor_request = vendor_requests.first()
-
-        # Send rejection email
-        subject = 'Your Vendor Request has been rejected'
-        html_message = render_to_string('admin_manage/vendor_request_rejected.html', {'vendor_request': vendor_request})
-        plain_text_message = strip_tags(html_message)
-        from_email = 'sewaghar93@gmail.com'
-        to_email = [vendor_email]
-        send_mail(subject, plain_text_message, from_email, to_email, html_message=html_message, fail_silently=False)
-        # Delete the vendor request
-        vendor_request.delete()
-
-        # Redirect to the staff request page
-        return redirect('admin_staffrequest')
-
-    # If there's no match, show a 404 error
-    else:
-        raise Http404("VendorRequest not found")
-
-def accept_vendor_request(request,vendor_email):
-    vendor_requests = VendorRequest.objects.filter(email=vendor_email)
-    if not vendor_requests.exists():
-        raise Http404("VendorRequest not found")
-
-    vendor_request = vendor_requests.first()
-
-    # Check if a staff member with this email already exists
+    # Check if staff member already exists
     if Staff.objects.filter(email=vendor_email).exists():
         messages.error(request, "A staff member with this email already exists.")
         return redirect('admin_staffrequest')
@@ -269,61 +270,48 @@ def accept_vendor_request(request,vendor_email):
             contact_number=vendor_request.contact_number,
             service=vendor_request.business_category,
             image=vendor_request.image,
-            experience=vendor_request.experience,
+            experience=getattr(vendor_request, 'experience', None),
             docs=vendor_request.docs,
             CA_image=vendor_request.CA_image,
             CB_image=vendor_request.CB_image,
             bio=vendor_request.business_description,
-            email=vendor_email,  # Assuming your Staff model has an email field
+            email=vendor_email,
             assigned_user=vendor_request.user,
         )
-        print("Created")
 
-        # Send a plain text email with basic formatting
+        # Send acceptance email
         subject = 'Your Vendor Request has been accepted'
         html_message = render_to_string('admin_manage/vendor_request_accepted_email.html', {'vendor_request': vendor_request})
         plain_text_message = strip_tags(html_message)
-        from_email = 'sewaghar93@gmail.com'
-        to_email = [vendor_email]
-        send_mail(subject, plain_text_message, from_email, to_email, html_message=html_message, fail_silently=False)
+        send_mail(subject, plain_text_message, 'sewaghar93@gmail.com', [vendor_email], html_message=html_message, fail_silently=False)
+
+        # Delete vendor request
         vendor_request.delete()
         messages.success(request, "Vendor request accepted successfully. An email has been sent to the vendor.")
         return redirect('admin_staffrequest')
+
     except IntegrityError:
-        messages.error(request, "An error occurred while processing the request. The staff member might already exist.")
+        messages.error(request, "An error occurred. Staff member might already exist.")
         return redirect('admin_staffrequest')
-        
+
+
+# Reject vendor request
+def reject_vendor_request(request, vendor_email):
+    vendor_request = get_object_or_404(VendorRequest, email=vendor_email)
+
+    # Send rejection email
+    subject = 'Your Vendor Request has been rejected'
+    html_message = render_to_string('admin_manage/vendor_request_rejected.html', {'vendor_request': vendor_request})
+    plain_text_message = strip_tags(html_message)
+    send_mail(subject, plain_text_message, 'sewaghar93@gmail.com', [vendor_email], html_message=html_message, fail_silently=False)
+
+    # Delete vendor request
+    vendor_request.delete()
+    messages.success(request, "Vendor request rejected successfully.")
+    return redirect('admin_staffrequest')
+
+
+# Optional: separate view if you need a direct vendor request list (can merge with admin_staffrequest)
 def vendor_requests(request):
-    vendor_request = VendorRequest.objects.get(pk=id)  # Replace 1 with the actual ID
-    return render(request, 'admin_staffrequest.html', {'vendor_request': vendor_request})
-
-
-def admin_disputes(request):
-    disputed_appointments = Appointment.objects.filter(dispute_created=True)
-    return render(request, 'admin_manage/admin_disputes.html', {'disputed_appointments': disputed_appointments})
-
-
-def resolve_dispute(request, appointment_id):
-    appointment = get_object_or_404(Appointment, pk=appointment_id)
-    if not appointment.dispute_resolved:
-        appointment.isFinished = "Yes"
-        appointment.dispute_resolved = True
-        appointment.save()
-        html_message = render_to_string('admin_manage/dispute_email.html', {'appointment': appointment})
-        plain_text_message = strip_tags(html_message)
-
-        send_mail(
-                'Dispute Resolved',
-                plain_text_message,
-                'sewaghar93@gmail.com',  
-                [appointment.email], 
-                html_message=html_message,
-                fail_silently=False,
-        )
-        return redirect(reverse('admin_disputes') + f'?success_message=Dispute resolved')
-    else:
-        messages.warning(request, 'Error')
-        return redirect(reverse('admin_disputes') + f'?warning_message=error ')
-
-    return redirect(reverse('admin_disputes') + f'?warning_message=Resolved already')
-
+    vendor_requests_list = VendorRequest.objects.all()
+    return render(request, 'admin_staffrequest.html', {'vendor_requests': vendor_requests_list})

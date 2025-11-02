@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+
+<link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/user_layout.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+    <title>Become a Service Provider</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="...">
+    <script src="https://code.jquery.com/jquery-3.6.4.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    {% block head %} {% endblock %}
+</head>
+<style>
+    .info_items .row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .item {
+        text-align: center;
+        margin-top: 20px; /* Adjust margin as needed */
+    }
+
+    .img-box {
+        display: inline-block;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        padding: 20px;
+    }
+</style>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'userPanel' %}">SewaGhar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'become-vendor' %}">
+                            Become a ServiceProvider
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'booking' %}">
+                            </i> Online Booking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'userPanel' %}">
+                            </i> Booking Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'history' %}">
+                           </i> History and Ratings
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{user.username}}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'inquiry' %}">Report</a>
+                            <a class="dropdown-item" href="{% url 'change' %}">Change Password</a>
+                            <a class="dropdown-item" href="{% url 'user_profile' %}">View Profile</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+
+
+<div class="container mt-5">
+    {% block body %}
+    {% if user.is_authenticated %}
+    <h1 class="ms-5 mb-4">User Panel</h1>
+
+    <div class="shadow p-4 mb-5 bg-body bg-body rounded text-black m-5">
+        <h2 class="fs-4">User Info:</h2>
+        <ul class="list-group fs-4 mt-3">
+            <li class="list-group-item list-group-item-action">Name: {{ user.username }}</li>
+            <li class="list-group-item list-group-item-action">Email: {{ user.email }}</li>
+            <li class="list-group-item list-group-item-action">Date Joined: {{ user.date_joined }}</li>
+            <li class="list-group-item list-group-item-action">Is Staff: {{ user.is_staff }}</li>
+            
+        </ul>
+    </div>
+    {% else %}
+    <div class="shadow p-4 mb-5 bg-body bg-body rounded text-black m-5">
+        <h1 class="p-2 ms-3 fs-4">First Sign in!</h1>
+        <a href="{% url 'login' %}" class="btn btn-primary text-white">Sign in</a>
+    </div>
+
+    {% endif %}
+    {% endblock %}
+</div>
+<script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                Swal.fire({
+                    title: 'Error',
+                    text: '{{ message|escapejs }}',
+                    icon: 'error',
+                    confirmButtonColor: '#007bff',
+                });
+            {% elif message.tags == 'success' %}
+                Swal.fire({
+                    title: 'Success',
+                    text: '{{ message|escapejs }}',
+                    icon: 'success',
+                    confirmButtonColor: '#007bff',
+                });
+            {% endif %}
+        {% endfor %}
+
+        // Clear Django messages after displaying them
+        {% for message in messages %}
+            {# Iterate through the messages to clear them #}
+        {% endfor %}
+    {% endif %}
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Get the CSRF token from the cookies
+                const csrftoken = getCookie('csrftoken');
+
+                // Make an AJAX request to logout view with CSRF token in headers
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "logout" %}',
+                    headers: {'X-CSRFToken': csrftoken},
+                    success: function () {
+                        // Redirect to login page after successful logout
+                        window.location.href = "{% url 'login' %}";
+                    },
+                    error: function (error) {
+                        console.error('Error during logout:', error);
+                        // Handle error as needed
+                    }
+                });
+            }
+        });
+    }
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+<!-- Link to Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"
+        defer></script>
+
+
+</body>
+
+</html>

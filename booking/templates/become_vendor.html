@@ -1,0 +1,319 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+<!-- Link to Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"
+        defer></script>
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/user_become_vendor.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" />
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
+    <title>Become a Service Provider</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="...">
+
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    {% block head %} {% endblock %}
+</head>
+
+
+    
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark ">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'userPanel' %}">SewaGhar</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'become-vendor' %}">
+                                Become a ServiceProvider
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'booking' %}">
+                                </i> Online Booking
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'userPanel' %}">
+                                </i> Booking Requests
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'history' %}">
+                               </i> History and Ratings
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{user.username}}
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{% url 'inquiry' %}">Report</a>
+                                <a class="dropdown-item" href="{% url 'user_profile' %}">View Profile</a>
+                                <a class="dropdown-item" href="{% url 'change' %}">Change Password</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="confirmLogout()">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+<body>
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+    <div class="form-container text-black">
+        <h1 class="text-center mt-2 mb-3">Service Provider Form</h1>
+        <p>Fill up the form with details</p>
+        <form method="post" class="row g-3" enctype="multipart/form-data" onsubmit="return validateForm()">
+
+            {% csrf_token %}
+            <div class="col-md-12">
+                <label for="inputName" class="form-label">Name <span class="required-star">*</span></label>
+                <input type="text" class="form-control" id="inputName" name="username" placeholder="Enter your name" />
+            </div>
+            <div class="col-md-12">
+                <label for="inputEmail" class="form-label">Email <span class="required-star">*</span></label>
+                <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Enter valid email address"
+                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" />
+            </div>
+            <div class="col-md-12">
+                <label for="inputName" class="form-label">Description <span class="required-star">*</span></label>
+                <input type="text" class="form-control" id="inputName" name="business_description"
+                    placeholder="Write why you want to join us" />
+            </div>
+            <div class="col-md-6">
+                <label for="inputAddress" class="form-label">Address <span class="required-star">*</span> </label>
+                <input type="text" class="form-control" id="inputAddress" name="business_address"
+                    placeholder="Enter your address" />
+            </div>
+            <div class="col-md-6">
+                <label for="inputNumber" class="form-label">Contact Number <span class="required-star">*</span> </label>
+                <input type="number" class="form-control" id="inputNumber" name="contact_number"
+                    placeholder="Enter your contact number" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="inputState" class="form-label">Category <span class="required-star">*</span></label>
+                
+            <select id="inputState" class="form-select" name="business_category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option>Electrician</option>
+                <option>Plumber</option>
+                <option>Painter</option>
+                <option>Cleaner</option>
+            </select>
+
+            </div>
+            <div class="col-md-6">
+                <label for="inputState" class="form-label">Experience <span class="required-star">*</span></label>
+                <input type="number" class="form-control" id="inputNumber" name="experience"
+                    placeholder="Enter your Experience in years " />
+            </div>
+            <div class="col-md-6">
+                <label for="inputImage" class="form-label">Image<span class="required-star">*</span> </label>
+                <input type="file" class="form-control" id="inputImage" name="image" accept="image/*">
+            </div>
+            <div class="col-md-6">
+                <label for="inputImage" class="form-label">Experience / Skill Document </label>
+                <input type="file" class="form-control" id="inputImage" name="docs" accept="pdf/*">
+            </div>
+            <div class="col-md-6">
+                <label for="inputImage" class="form-label">Citizenship Front <span class="required-star">*</span> </label>
+                <input type="file" class="form-control" id="inputCAImage" name="CA_image" accept="image/*">
+            </div>
+            <div class="col-md-6">
+                <label for="inputImage" class="form-label">Citizenship Back <span class="required-star">*</span></label>
+                <input type="file" class="form-control" id="inputCBImage" name="CB_image" accept="image/*">
+            </div>
+            <div class="col-md-12 mt-3" style="text-align: left;">
+                <input type="checkbox" id="termsCheckbox">
+                <label for="termsCheckbox">
+                    <a href="#" data-toggle="modal" data-target="#termsModal">
+                        I agree to the Terms and Conditions
+                    </a>
+                </label>
+            </div>
+            
+            <!-- Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Terms and Conditions:</strong></p>
+                <ol>
+                    <li>Your submission is limited to a single occurrence.</li>
+                    <li>Access to the system will be granted only upon approval by the designated administrator.</li>
+                    <li>Notification of your access status will be communicated via email.</li>
+                    <li>Any attempt to manipulate or exploit the system is strictly prohibited.</li>
+                    <li>Submitted information must be accurate and truthful.</li>
+                    <li>You agree to comply with all relevant laws and regulations.</li>
+                    <li>The organization reserves the right to revoke access at any time without prior notice.</li>
+                </ol>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+            <div class="col-md-6 offset-md-3 text-center">
+                <button type="submit" class="btn btn-primary btn-lg btn-submit">
+                    Submit
+            </button>
+            </div>
+        </form>
+    </div>
+    <script>
+        function validateForm() {
+            var name = document.getElementById('inputName').value;
+            var email = document.getElementById('inputEmail').value;
+            var address = document.getElementById('inputAddress').value;
+            var contactNumber = document.getElementById('inputNumber').value;
+            var image = document.getElementById('inputImage').files[0];
+            var citizenshipFront = document.getElementById('inputCAImage').files[0];
+            var citizenshipBack = document.getElementById('inputCBImage').files[0];
+            var termsCheckbox = document.getElementById('termsCheckbox');
+    
+            if (!name || !email || !address || !contactNumber || !image || !citizenshipFront || !citizenshipBack) {
+                // Use SweetAlert for a more visually appealing alert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please fill in all the fields before proceeding',
+                });
+                return false;
+            }
+    
+            // Check if the contact number has exactly 10 digits
+            if (contactNumber.length !== 10 || isNaN(contactNumber)) {
+                // Use SweetAlert for an alert about the contact number
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Contact Number',
+                    text: 'Please enter a valid 10-digit contact number.',
+                });
+                return false;
+            }
+    
+            // Check image file types (you can customize this based on your requirements)
+            var allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (allowedImageTypes.indexOf(image.type) === -1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Image Format',
+                    text: 'Please upload a valid image format (JPEG, PNG, or GIF).',
+                });
+                return false;
+            }
+    
+            // Check citizenship images file types
+            var allowedCitizenshipImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (allowedCitizenshipImageTypes.indexOf(citizenshipFront.type) === -1 || allowedCitizenshipImageTypes.indexOf(citizenshipBack.type) === -1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Citizenship Image Format',
+                    text: 'Please upload valid citizenship images in JPEG, PNG, or GIF format.',
+                });
+                return false;
+            }
+    
+            // Check if the terms and conditions checkbox is checked
+            if (!termsCheckbox.checked) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terms and Conditions',
+                    text: 'Please agree to the Terms and Conditions before submitting the form.',
+                });
+                return false;
+            }
+    
+            return true;
+        }
+    </script>
+<!-- Include this script inside your HTML file, after the other scripts -->
+<script>
+    function confirmLogout() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, logout'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Get the CSRF token from the cookies
+                const csrftoken = getCookie('csrftoken');
+
+                // Make an AJAX request to logout view with CSRF token in headers
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "logout" %}',
+                    headers: {'X-CSRFToken': csrftoken},
+                    success: function () {
+                        // Redirect to login page after successful logout
+                        window.location.href = "{% url 'login' %}";
+                    },
+                    error: function (error) {
+                        console.error('Error during logout:', error);
+                        // Handle error as needed
+                    }
+                });
+            }
+        });
+    }
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+
+    </body>
+    </html>

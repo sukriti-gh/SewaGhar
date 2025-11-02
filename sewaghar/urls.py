@@ -21,28 +21,33 @@ from . import views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.conf.urls import handler404
+from django.views.generic import RedirectView
+
 
 urlpatterns = [
-    # Admin app URLs (admin_manage)
-    path('admin/', include('admin_manage.urls')),
-    # Core app URLs
-    path('booking/', include('booking.urls')),
-
+    path('admin/', admin.site.urls),
+    
     # Default Django admin
-    path('admin-login/', admin.site.urls),
+    path('admin/', admin.site.urls),
+
+   # Custom Admin Panel (your dashboard)
+    path('admin-panel/', include('admin_manage.urls')),
+
+    path('login-admin/', RedirectView.as_view(url='/admin-panel/login-admin/', permanent=False)),
+
+
+    # Core app
+    path('booking/', include('booking.urls')),
 
     # Main pages
     path('', views.home, name='home'),
     path('home/', views.home, name='home'),
-
-    # User-related pages
     path('about/', views.about_view, name='about'),
     path('services/', views.services_view, name='services'),
     path('contact/', views.contact_view, name='contact'),
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
-
-    # FAQ
     path('faq/', views.faq_view, name='faq'),
 
     # User authentication
@@ -54,10 +59,13 @@ urlpatterns = [
 
     # Contact form submission
     path('contact_form/', views.contact_form, name='contact_form'),
+    path('contact/', views.contact_form, name='contact_email'),
 
-    # 404 fallback
-    path('<path:unknown_path>/', TemplateView.as_view(template_name='custom_404.html'), name='page_not_found'),
 ]
-# Media static files 
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+ # 404 fallback
+    handler404 = 'sewaghar.views.custom_404_view'
+    

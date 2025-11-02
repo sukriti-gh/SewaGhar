@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendor Request Submission</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+
+        h2 {
+            color: #0066cc;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Updated styles for the table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0066cc;
+            color: #fff;
+        }
+
+        /* Updated styles for the "What to expect next" paragraphs */
+        p.title {
+            font-weight: bold;
+        }
+
+        /* Logo Section */
+        .logo-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .logo {
+            width: 400px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo Section -->
+    <div class="logo-container">
+       <a href="https://imgbb.com/">
+        <img src="https://i.ibb.co/R4HZmC8V/logo.jpg" 
+             alt="logo" 
+             border="0" 
+             width="300" 
+             height="300" 
+             style="width: 300px; height: 300px; display: block; margin: 0 auto;">
+       </a>
+    </div>
+
+    <h2>Vendor Request Submission</h2>
+    <p>Dear {{ vendor_request.user.username }},</p>
+    <p>Thank you for expressing your interest in becoming a service provider on our platform. We have received your vendor request, and our team will review it promptly.</p>
+    <p>Your request details:</p>
+    <table>
+        <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Business Name</td>
+            <td>{{ vendor_request.business_name }}</td>
+        </tr>
+        <tr>
+            <td>Business Address</td>
+            <td>{{ vendor_request.business_address }}</td>
+        </tr>
+        <tr>
+            <td>Contact Number</td>
+            <td>{{ vendor_request.contact_number }}</td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td>{{ vendor_request.email }}</td>
+        </tr>
+        <tr>
+            <td>Business Category</td>
+            <td>{{ vendor_request.business_category }}</td>
+        </tr>
+        <tr>
+            <td>Business Description</td>
+            <td>{{ vendor_request.business_description }}</td>
+        </tr>
+        <tr>
+            <td>Experience</td>
+            <td>{{ vendor_request.experience }} years</td>
+        </tr>
+    </table>
+    <p>We understand the importance of selecting reliable service providers, and our team will carefully assess your application to ensure a seamless experience for our users.</p>
+    <p class="title">What to expect next:</p>
+    <ul>
+        <li>Our team will review your request and may contact you for additional information if needed.</li>
+        <li>If your request is approved, you will receive further instructions on how to proceed with the onboarding process.</li>
+        <li>If your request is declined, we will provide feedback and suggestions to help you improve your application in the future.</li>
+    </ul>
+    <p> <b> The response time is 5 business days, please have patience until then. </b></p>
+    <p>We appreciate your interest in joining our platform. If you have any questions or need further assistance, please feel free to reach out to us at <a href="mailto:support@example.com">sewaghar93@gmail.com</a>.</p>
+    <p>Thank you for choosing our platform.</p>
+    <p>Best regards,</p>
+    <p>SewaGhar Team</p>
+</body>
+</html>

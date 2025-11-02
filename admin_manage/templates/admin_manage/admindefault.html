@@ -1,0 +1,302 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.6.4.min.js'%}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}">
+    <script src="{% static 'js/sweetalert2@11.js'%}"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/preloader.css' %}">
+    <script src="{% static 'js/preloader.js' %}"></script>
+    <title>Admin Dashboard</title>
+
+    {% block head %} {% endblock %}
+
+    <style>
+        body {
+            padding-top: 0;
+            margin-top: 0;
+            background-color: #f8f9fa;
+            color: #495057;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+
+        header {
+            background-color: #1b2a4e;
+            color: white;
+            padding: 10px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 15px;
+        }
+
+        .navbar-nav .nav-link {
+            color: white;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #dfeeff;
+        }
+
+        .navbar-toggler-icon {
+            color: white;
+        }
+
+        .alert {
+            margin-top: 20px;
+        }
+
+        .list-group-item {
+            background-color: #e9ecef;
+        }
+
+        .card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            border-radius: 0;
+        }
+
+        .btn-primary:hover {
+            background-color: #003c80;
+            border-color: #003c80;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .graph-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 10px; /* Add padding for content spacing */
+        }
+
+        @media (max-width: 768px) {
+            .graph-card {
+                padding: 5px; /* Adjust padding for smaller screens */
+            }
+        }
+
+    </style>
+</head>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'admin_default' %}">Admin Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_default' %}">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_users' %}">
+                            Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_serviceproviders' %}">
+                            Service Providers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href= "{% url 'admin_staffrequest' %}">
+                            Service Provider Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_feedback' %}">
+                            Feedback
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_disputes' %}">
+                            Disputes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="confirmLogout()">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<body>
+    <div class="preloader">
+        <img src="{% static 'images/preloader.gif' %}" alt="Preloader" />
+    </div>
+  
+    <div id="default-section" class="container mt-3">
+        <div class="row p-3">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Users</h5>
+                        <p class="card-text">{{ total_users }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Service Providers</h5>
+                        <p class="card-text">{{ total_service_providers }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Service Providers Requests</h5>
+                        <p class="card-text">{{ pending_requests }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph section -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><b>Service Providers Tier Counts</b></h5>
+                    <div id="bar_chart_div" class="mt-3" style="height: 500px;;"></div>
+                </div>
+            </div>
+        
+            <div class="col-md-6 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><b>Service Distribution</b></h5>
+                    <div id="service_pie_chart_div" class="mt-3" style="height: 500px;"></div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            google.charts.load('current', { 'packages': ['bar'] });
+            google.charts.setOnLoadCallback(drawBarChart);
+        
+            function drawBarChart() {
+                var data = google.visualization.arrayToDataTable([
+                    ['Tier', 'Count'],
+                    {% for entry in staff_tier_counts %}
+                        ['{{ entry.tier }}', {{ entry.total }}],
+                    {% endfor %}
+                ]);
+        
+                var options = {
+                    chart: {
+
+                    },
+                    bars: 'vertical',
+                    legend: { position: 'none' }, // Hide legend
+                    colors: ['#4285f4'], // Bar color
+                    hAxis: {
+                        title: 'Count',
+                        minValue: 0,
+                        textStyle: { fontSize: 12 },
+                    },
+                    vAxis: {
+                        title: 'Tier',
+                        textStyle: { fontSize: 12 },
+                    },
+                    height: 500, // Adjust the chart height
+                    width: 600, // Adjust the chart width
+                };
+        
+                var chart = new google.charts.Bar(document.getElementById('bar_chart_div'));
+                chart.draw(data, google.charts.Bar.convertOptions(options));
+            }
+        </script>
+        
+
+
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.setOnLoadCallback(drawServicePieChart);
+
+    function drawServicePieChart() {
+        var serviceData = google.visualization.arrayToDataTable([
+            ['Service', 'Count'],
+            {% for entry in staff_service_distribution %}
+                ['{{ entry.service }}', {{ entry.total }}],
+            {% endfor %}
+        ]);
+
+        var options = {
+            title: 'Service Distribution',
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('service_pie_chart_div'));
+        chart.draw(serviceData, options);
+    }
+</script>
+
+
+
+        
+
+        <script>
+            function confirmLogout() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will be logged out',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, logout'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{% url 'login-admin' %}"; // Redirect to logout URL
+                    }
+                });
+            }
+        </script>
+
+    </div>
+</body>
+
+</html>
