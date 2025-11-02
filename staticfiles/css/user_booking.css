@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Arial:wght@400&display=swap');
+
+body {
+    padding-top: 0;
+    margin-top: 0;
+    color: #495057;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+
+}
+
+header {
+    background: linear-gradient(to right, #4275ab, #003c80);
+    color: white;
+    padding: 10px;
+    font-family: 'Arial', sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white; 
+}
+
+
+.navbar-nav {
+    margin-left: auto;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.navbar-nav .nav-link {
+    color: white; /* White text color */
+    font-weight: bold; /* Make text bold */
+    transition: color 0.3s; /* Smooth transition for color change */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #dfeeff; /* Lighter color on hover */
+}
+
+.navbar-toggler-icon {
+    color: white; /* White color for the navbar toggler icon */
+}
+
+
+
+.alert {
+    margin-top: 20px;
+}
+
+.list-group-item {
+    background-color: #e9ecef; /* Slightly darker background for list items */
+}
+
+.card {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+
+.booking-container {
+    max-width: 600px;
+    margin: 1% auto; 
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-weight: bold;
+    transition: box-shadow 0.3s;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .booking-container {
+        margin: 3% auto; /* Adjusted margin for equal distance at the top and bottom */
+        padding: 15px;
+        max-width: 100%;
+    }
+}
+
+.form-select,
+.form-control,
+.btn {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    transition: border-color 0.3s;
+}
+
+.form-control,
+.form-select {
+    border: 2px solid #e0e0e0;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: none;
+}
+
+.radio-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.required-star {
+    color: red;
+}
+
+.radio-label {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    margin: 0 5px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s, transform 0.3s;
+}
+
+.radio-label:hover {
+    background: linear-gradient(to right, #bfc5ca, #bdd6e6);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+.input-group-append {
+    display: flex;
+    align-items: center;
+}
+
+.input-group-append .btn {
+    margin-right: 10px;
+}
+
+.input-group-append .btn i {
+    /* If your logo is an <i> element, adjust the alignment as needed */
+    vertical-align: middle;
+}
+
+
+
+.booking-container h1 {
+    text-align: center;
+}

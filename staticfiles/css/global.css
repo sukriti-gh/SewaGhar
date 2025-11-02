@@ -1,0 +1,195 @@
+/* global.css - Sewa Ghar Global Header & Footer Styles */
+
+
+/* HEADER STYLES */
+
+.hero_area {
+  background-color: #e6f0ff;
+}
+
+.header_section .header_bottom {
+  background-color: #1b2a4e;
+  padding: 0;
+}
+
+.header_section .custom_nav-container {
+  padding: 20px 60px;
+  background-color: #1b2a4e;
+}
+
+.navbar-brand {
+  padding: 0;
+  margin: 0;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.navbar-brand span {
+  color: white;
+  font-weight: bold;
+}
+
+.custom_nav-container .navbar-nav {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}
+
+.custom_nav-container .navbar-nav .nav-item .nav-link {
+  padding: 10px 25px;
+  color: white;
+  text-align: center;
+  font-weight: 500;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+.custom_nav-container .navbar-nav .nav-item:hover .nav-link,
+.custom_nav-container .navbar-nav .nav-item.active .nav-link {
+  color: #ff6b3d;
+}
+
+.header_section .btn-primary,
+.header_section button.btn-primary {
+  background-color: #ff6b3d;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 25px;
+  font-weight: 500;
+  color: white;
+}
+
+.header_section .btn-primary:hover {
+  background-color: #e55a2d;
+}
+
+.custom_nav-container .navbar-toggler {
+  outline: none;
+  padding: 0;
+  width: 37px;
+  height: 42px;
+  transition: all 0.3s;
+}
+
+.custom_nav-container .navbar-toggler span {
+  display: block;
+  width: 35px;
+  height: 4px;
+  background-color: white;
+  margin: 7px 0;
+  transition: all 0.3s;
+  position: relative;
+  border-radius: 5px;
+}
+
+/* FOOTER STYLES */
+
+.info_section {
+  padding: 75px 0;
+  background-color: #1b2a4e;
+  text-align: center;
+  color: #fff;
+}
+
+.info_section h4 {
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 25px;
+  color: white;
+  font-size: 24px;
+}
+
+.info_items a {
+  position: relative;
+}
+
+.info_items .item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.info_items .item .img-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  background-color: #0355cc;
+  background-repeat: no-repeat;
+  background-position: center;
+  text-align: center;
+  line-height: 80px;
+  color: #ffffff;
+}
+
+.info_items .item .img-box i {
+  font-size: 24px;
+  color: #ff6b3d;
+}
+
+.info_items .item p {
+  margin-top: 25px;
+  color: #fff;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.info_items .item:hover .img-box {
+  background-color: #ff8a1d;
+}
+
+.info_items {
+  position: relative;
+}
+
+.info_items::before {
+  content: "";
+  position: absolute;
+  top: 65px;
+  width: 75%;
+  height: 1px;
+  background-color: #fff;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.info_section a {
+  color: white;
+  text-decoration: none;
+}
+
+.info_section a:hover {
+  color: #ff6b3d;
+}
+
+/* RESPONSIVE STYLES */
+
+@media (max-width: 991px) {
+  .custom_nav-container .navbar-nav {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .header_section .custom_nav-container {
+    padding: 15px 30px;
+  }
+  
+  .info_section {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-brand span {
+    font-size: 20px;
+  }
+  
+  .info_section h4 {
+    font-size: 20px;
+  }
+}

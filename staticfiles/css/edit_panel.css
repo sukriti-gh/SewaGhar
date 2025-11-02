@@ -1,0 +1,75 @@
+.container {
+    max-width: 600px;
+    margin-top: -20; /* Set top margin to 0 */
+    margin-bottom: 20px; /* Keep some space at the bottom */
+    margin-left: auto; /* Center the container */
+    margin-right: auto; /* Center the container */
+    padding: 0 15px;
+}
+
+.edit-appointment-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.edit-appointment-card h1 {
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: .5rem;
+    color: #666;
+}
+
+.form-select {
+    display: block;
+    width: 100%;
+    padding: .375rem 1.75rem .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: .5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    border-radius: .3rem;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+.btn:hover {
+    background: linear-gradient(to right, #2980b9, #3498db);
+    border-color: #fff;
+}
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .edit-appointment-card {
+        padding: 1rem;
+    }
+}

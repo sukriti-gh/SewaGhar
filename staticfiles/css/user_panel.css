@@ -1,0 +1,120 @@
+.user-panel-container {
+    max-width: 1000px;
+    margin: 2% auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-info h2 {
+    color: #0062cc;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.user-details {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.user-details li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.appointments-section {
+    margin-top: 2rem;
+}
+
+.appointment-card {
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-card .card-body {
+    padding: 1.25rem;
+}
+
+.appointment-card .card-title {
+    color: #007bff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.appointment-card .card-text {
+    font-size: 1rem;
+    color: #495057;
+}
+
+.appointment-card .card-footer {
+background-color: #f8f9fa;
+display: flex;
+flex-wrap: wrap; /* Allow items to wrap to the next line on smaller screens */
+justify-content: space-between;
+align-items: center;
+padding: 0.75rem 1.25rem;
+}
+
+.appointment-card .card-footer .btn {
+margin-top: 0.5rem; /* Add some space between buttons on smaller screens */
+}
+.appointment-card .badge {
+    font-size: 1.2rem;
+}
+
+.appointment-card .btn {
+    font-size: 1rem;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-danger {
+    border-width: 2px;
+    color: #fff;
+}
+
+.btn-primary
+{
+    border-width: 2px;
+    color: #fff;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-primary:hover,
+.btn-danger:hover {
+    opacity: 0.8;
+}
+
+.modal-content {
+    border-radius: 15px;
+}
+
+.modal-header,
+.modal-footer {
+    border: none;
+}
+
+
+
+@media (max-width: 768px) {
+    .user-panel-container {
+        margin: 5% auto;
+        padding: 10px;
+    }
+
+    .appointment-card {
+        margin-bottom: 1rem;
+    }
+}

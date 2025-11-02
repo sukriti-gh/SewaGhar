@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Arial:wght@400&display=swap');
+
+body {
+    padding-top: 0;
+    margin-top: 0;
+    color: #495057;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+}
+    /* Add CSS for the logo image */
+    .logo-img {
+        width: 50px; /* Adjust the width as needed */
+        height: auto; /* Maintain aspect ratio */
+        margin-right: 10px; /* Add margin for spacing */
+    }
+header {
+    background: linear-gradient(to right, #4275ab, #003c80);
+    color: white;
+    padding: 10px;
+    font-family: 'Arial', sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white; /* White text color */
+}
+
+.navbar-nav {
+    margin-left: auto;
+}
+
+.navbar-nav .nav-item {
+    margin-right: 15px;
+}
+
+.navbar-nav .nav-link {
+    color: white; /* White text color */
+    font-weight: bold; /* Make text bold */
+    transition: color 0.3s; /* Smooth transition for color change */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #dfeeff; /* Lighter color on hover */
+}
+
+.navbar-toggler-icon {
+    color: white; /* White color for the navbar toggler icon */
+}
+
+.alert {
+    margin-top: 20px;
+}
+
+.list-group-item {
+    background-color: #e9ecef; /* Slightly darker background for list items */
+}
+
+.card {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+
+
