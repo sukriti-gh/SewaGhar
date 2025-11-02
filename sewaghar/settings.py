@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 from decouple import config
 
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -117,7 +120,7 @@ SITE_NAME = "SewaGhar"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-KHALTI_PUBLIC_KEY = config('KHALTI_PUBLIC_KET')
+KHALTI_PUBLIC_KEY = config('KHALTI_PUBLIC_KEY')
 
-KHALTI_SECRET_KEY = CONFIG('KHALTI_SECRET_KEY')
+KHALTI_SECRET_KEY = config('KHALTI_SECRET_KEY')
 #KHALTI_VERIFICATION_URL = "https://dev.khalti.com/api/v2/payment/verify/"
