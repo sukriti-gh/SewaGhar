@@ -121,7 +121,7 @@ body {
                       <li>Note: The charge mentioned is solely the service charge and does not encompass the entire cost.</li>
                     </ul>
                   </div>
-                
+                {% comment %} write details of staff member and appointments {% endcomment %}
                 <div class="container mt-5">
     <table class="table table-bordered border-primary">
         <tbody>
@@ -218,65 +218,20 @@ if (creditPoints <= 0) {
     }
 </script>
 
-<script> 
-    // 🔑 CRITICAL FIX: Define URLs as constants at the top-level
-    const csrf_token = "{{ csrf_token }}";
+<script>
+    // Define the URL for your backend payment view
     const KHALTI_PAYMENT_URL = "{% url 'khalti-payment' %}";
-    const USER_PANEL_URL = "{% url 'userPanel' %}";
-    
-    async function Pay_Khalti(staffId, tier) {
-        console.log("Staff ID:", staffId);
-        console.log("Staff Tier:", tier);
-        let amount;
+    const csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        // --- CRITICAL UPDATE: Implement correct tiered pricing in PAISA (Rs * 100) ---
-        const lowerTier = tier.toLowerCase();
+    function Pay_Khalti(amount, staffId, productIdentity, productName, productUrl) {
+        // --- BYPASS: Skip Khalti Checkout and use a hardcoded success token ---
+        const dummyToken = "BYPASS_SUCCESS_TOKEN"; // Special token the backend will recognize
+        const dummyAmount = amount; 
+
+        // Immediately call the pays function to process the booking in the backend.
+        pays(dummyToken, dummyAmount, staffId);
         
-        if (lowerTier === "gold") {
-            amount = 20000; // Rs 200 * 100 paisa
-        } else if (lowerTier === "silver") {
-            amount = 15000; // Rs 150 * 100 paisa
-        } else if (lowerTier === "bronze") {
-            amount = 10000; // Rs 100 * 100 paisa
-        } else {
-            // Fallback for an unassigned tier (use a default or throw error)
-            console.error("Unknown staff tier. Using default test amount.");
-            amount = 1000; // For testing purposes (Rs 10)
-        }
-    
-        
-        const config = {
-            publicKey: "{{ khalti_public_key }}",
-            productIdentity: staffId,
-            productName: "Service Provider",
-            productUrl: "http://127.0.0.1:8000/",
-            eventHandler: {
-                onSuccess: async (payload) => {
-                    // payload.amount is the amount collected by Khalti in PAISA
-                    await pays(payload.token, payload.amount, staffId);
-                    
-                    // Hide modal and redirect only after successful backend processing
-                    $(`#confirmationModal${staffId}`).modal('hide');
-                    window.location.href = USER_PANEL_URL; 
-                },
-                onError: (error) => {
-                    console.log(error);
-                },
-                onClose: () => {
-                    // Handle modal close
-                },
-            },
-            paymentPreference: [
-                "KHALTI",
-            ],
-        };
-        try {
-            const checkout = new KhaltiCheckout(config);
-            checkout.show({ amount });
-            console.log("Khalti Checkout show() called.");
-        } catch (error) {
-            console.error("Khalti Checkout Failed to Open. Error Details:", error);
-        }
+        // No need for KhaltiCheckout code here anymore.
     }
 
     async function pays(paymentToken, amount, staffId) {
@@ -288,13 +243,22 @@ if (creditPoints <= 0) {
                 'X-CSRFToken': csrf_token,
             },
             body: JSON.stringify({
-                payment_token: paymentToken,
+                payment_token: paymentToken, 
                 payment_amount: amount,
                 staff_id: staffId,
             }),
         });
 
-        console.log("Backend payment status:", response.status);
+        // Check for successful response from the backend (200 OK)
+        if (response.ok) {
+            // SHOW SUCCESS POPUP AND REDIRECT TO HOME
+            alert("Payment successful!");
+            window.location.href = "/"; // Redirect to the home page (which is '/')
+        } else {
+            // Fallback for any unexpected backend error
+            alert("Booking failed. (Simulated Payment Error)");
+            console.error("Backend payment processing failed.");
+        }
     };
 </script>
 

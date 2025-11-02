@@ -4,7 +4,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import accept_vendor_request, reject_vendor_request, admin_disputes
-
+from admin_manage import views as admin_views
 
 urlpatterns = [
     # Dashboard / Home
@@ -26,6 +26,8 @@ urlpatterns = [
     path('admin-panel/reject_vendor_request/<str:vendor_email>/', views.reject_vendor_request, name='reject_vendor_request'),
     path('update_vendor_tier/', views.update_vendor_tier, name='update_vendor_tier'),
     
+    path('dashboard-panel/', views.staffPanel, name='dashboard-panel'),
+
     # Delete Users
     path('delete-user/<int:id>/', views.delete_user, name='delete-user'),
 
