@@ -24,7 +24,6 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.admin.views.decorators import staff_member_required
 
 def index(request):
     return render(request, 'admin_manage/index.html')
@@ -100,10 +99,7 @@ def staffPanel(request):
     maxDate = strdeltatime
     #Only show the Appointments 21 days from today
     items = Appointment.objects.filter(day__range=[minDate, maxDate]).order_by('day', 'time')
-    print("--- DEBUG STAFF CHECK ---")
-    print(f"User is logged in: {request.user.is_authenticated}")
-    print(f"User ID: {request.user.id}")
-    print(f"Is Staff: {request.user.is_staff}")
+
     return render(request, 'admindashBoard.html', {
         'items':items,
     })
@@ -262,9 +258,6 @@ def admin_staffrequest(request):
 # Accept vendor request
 def accept_vendor_request(request, vendor_email):
     vendor_request = get_object_or_404(VendorRequest, email=vendor_email)
-    
-    # Get the associated User object before the try block for better scope
-    user_to_promote = vendor_request.user 
 
     # Check if staff member already exists
     if Staff.objects.filter(email=vendor_email).exists():
@@ -272,7 +265,6 @@ def accept_vendor_request(request, vendor_email):
         return redirect('admin_staffrequest')
 
     try:
-        # 1. Create the Staff/Vendor object
         Staff.objects.create(
             name=vendor_request.business_name,
             contact_number=vendor_request.contact_number,
@@ -284,27 +276,24 @@ def accept_vendor_request(request, vendor_email):
             CB_image=vendor_request.CB_image,
             bio=vendor_request.business_description,
             email=vendor_email,
-            assigned_user=user_to_promote,
+            assigned_user=vendor_request.user,
         )
 
-        # 2. ⭐️ CRITICAL FIX: Promote the associated Django User to staff status
-        user_to_promote.is_staff = True
-        user_to_promote.save()
-        
-        # 3. Send acceptance email
+        # Send acceptance email
         subject = 'Your Vendor Request has been accepted'
         html_message = render_to_string('admin_manage/vendor_request_accepted_email.html', {'vendor_request': vendor_request})
         plain_text_message = strip_tags(html_message)
         send_mail(subject, plain_text_message, 'sewaghar93@gmail.com', [vendor_email], html_message=html_message, fail_silently=False)
 
-        # 4. Delete vendor request
+        # Delete vendor request
         vendor_request.delete()
-        messages.success(request, "Vendor request accepted successfully. The user is now a staff member. An email has been sent to the vendor.")
+        messages.success(request, "Vendor request accepted successfully. An email has been sent to the vendor.")
         return redirect('admin_staffrequest')
 
     except IntegrityError:
         messages.error(request, "An error occurred. Staff member might already exist.")
         return redirect('admin_staffrequest')
+
 
 # Reject vendor request
 def reject_vendor_request(request, vendor_email):
